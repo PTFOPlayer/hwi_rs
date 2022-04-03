@@ -4,8 +4,6 @@ import processes
 import json
 import os
 
-os.popen('@echo off')
-
 with open('config.json') as configf:
         #read json file
         config = json.load(configf)
