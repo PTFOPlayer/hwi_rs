@@ -30,7 +30,6 @@ class Window(QWidget):
         self.label_cpu = QLabel()
         self.label_cpu.setStyleSheet(FontStyle)
         self.label_cpu.setAlignment(Qt.AlignLeft)
-        print(self.label_cpu.alignment())
         # creating a label for ram usage
         self.label_ram = QLabel()
         self.label_ram.setStyleSheet(FontStyle)
