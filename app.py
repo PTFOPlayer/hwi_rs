@@ -149,9 +149,13 @@ class Window(QWidget):
 
         
         # showing gpu mem usage in the label
-        gpu_mem = processes.nvd_gpumem()
-        self.label_gpu_mem.setText("\nGPU memory used : " + str(gpu_mem[0]) + "MB" +
-                               "\nGPU memory max : " + str(gpu_mem[1]) + "MB")
+        try:
+            gpu_mem = processes.nvd_gpumem()
+            self.label_gpu_mem.setText("\nGPU memory used : " + str(gpu_mem[0]) + "MB" +
+                                   "\nGPU memory max : " + str(gpu_mem[1]) + "MB")
+        except:
+            self.label_gpu_mem.setText("\nGPU memory used : " + "Not found" + 
+                                       "\nGPU memory max : " + "Not found")
         
         # showing network usage in the label
         self.label_network.setText("\nNetwork usage : " + str(processes.network_usage()) + "Mb/s")
