@@ -1,6 +1,5 @@
 
 #program to display the stats of a pc using the pyqt5 library
-from msilib.schema import TextStyle
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
