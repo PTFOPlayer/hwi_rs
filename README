@@ -2,6 +2,6 @@ hardware info app for linux
 Curently no support for Radeon and Intel GPU's but with Nvidia GPU's works with full functionality
 
 Needed modules:
-Tkinter (to be replaced with pyqt5, you can see progress on that by launching old/app.py instead of /app.py)
+pyqt5 (old TK version in /old)
 psutil
-time
+cpuinfo
