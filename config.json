@@ -4,25 +4,6 @@
     "font_size": "20px",
     "font_family": "Arial",
     "bar_color": "Grey",
-    "cpu":
-    {
-        "show": true,
-        "os": "Linux"
-    },
-    "ram":
-    {
-        "show": true,
-        "type": "full"
-    },
-    "gpu":
-    {
-        "show": true,
-        "type": "full"
-    },
-    "drives":
-    {
-        "show": true,
-        "ammount": "full"
-    }
+    "gpu":"nvidia"
 
 }

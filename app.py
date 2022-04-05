@@ -153,18 +153,18 @@ class Window(QWidget):
         
         # showing gpu usage in the label
         try:
-            gpu_usg = processes.nvd_gpuusg()
-            self.label_gpu.setText("\nGPU model : " + str(gpu_usg[0]) + "\n"
-                                    + "GPU temperature in : " + str(gpu_usg[2]) + " °C \n"
-                                    + "GPU power in W : " + str(gpu_usg[3])
-                                    + "\nGPU usage :")
-            bar_gpu = int(gpu_usg[1])
-            self.progressBar_gpu.setValue(bar_gpu)
-            gpu_mem = processes.nvd_gpumem()
-            self.label_gpu_mem.setText("GPU memory used : " + str(gpu_mem[0]) + "MB" +
-                                   "\nGPU memory max : " + str(gpu_mem[1]) + "MB")
-        except:
-            try:
+            if(config.get('gpu') == "nvidia"):   
+                gpu_usg = processes.nvd_gpuusg()
+                self.label_gpu.setText("\nGPU model : " + str(gpu_usg[0]) + "\n"
+                                        + "GPU temperature in : " + str(gpu_usg[2]) + " °C \n"
+                                        + "GPU power in W : " + str(gpu_usg[3])
+                                        + "\nGPU usage :")
+                bar_gpu = int(gpu_usg[1])
+                self.progressBar_gpu.setValue(bar_gpu)
+                gpu_mem = processes.nvd_gpumem()
+                self.label_gpu_mem.setText("GPU memory used : " + str(gpu_mem[0]) + "MB" +
+                                        "\nGPU memory max : " + str(gpu_mem[1]) + "MB")
+            if(config.get('gpu') == "amd"):
                 gpu_temp = processes.amd_gpuusg()
                 gpu_usg = gpu_temp[0]
                 gpu_mem = gpu_temp[1]
@@ -172,10 +172,15 @@ class Window(QWidget):
                 bar_gpu = int(gpu_usg)
                 self.progressBar_gpu.setValue(bar_gpu)
                 self.label_gpu_mem.setText("GPU memory used : " + str(gpu_mem))
-            except:
-                self.label_gpu.setText("\nGPU model : " + "Not found")
+            if(config.get('gpu') == "intel"):
+                self.label_gpu.setText("\n Intel GPU not supported")
                 self.progressBar_gpu.setValue(0)
-        # showing network usage in the label
+        except:
+            self.label_gpu.setText("\n GPU not found, please check your config file\n"+
+                                   "or check if your GPU is supported"+
+                                   "config files accepts only nvidia, amd or intel")
+            
+        #showing network usage in the label
         self.label_network.setText("\nNetwork usage : " + str(processes.network_usage()) + "Mb/s")
         
         # showing drive usage in the label

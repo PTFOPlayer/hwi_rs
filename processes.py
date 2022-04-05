@@ -55,7 +55,7 @@ def nvd_gpumem():
     #monitoring Nvidia GPU memory usage
     command = "nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader,nounits"
     gpu_mem = os.popen(command).read()
-    sep_gpu_mem = gpu_mem.decode('utf-8').split(',')
+    sep_gpu_mem = gpu_mem.split(',')
     gpmem_usg = round(int(sep_gpu_mem[0]), 2)
     gpmem_max = round(int(sep_gpu_mem[1]), 2)
 
@@ -65,7 +65,7 @@ def nvd_gpuusg():
     #monitoring Nvidia GPU usage
     command = "nvidia-smi --query-gpu=utilization.gpu,temperature.gpu,name,power.draw --format=csv,noheader,nounits"
     gpu_usg = os.popen(command).read()
-    split_gpu_usg = gpu_usg.decode('utf-8').split(',')
+    split_gpu_usg = gpu_usg.split(',')
     gpu_usg = split_gpu_usg[0]
     gpu_temp = split_gpu_usg[1]
     gpu_name = split_gpu_usg[2]
@@ -86,4 +86,3 @@ def amd_gpuusg():
     gpu_util = float(gpu_util_split[0])
     gpu_mem = amd_gpu_usg[13]
     return gpu_util, gpu_mem
-
