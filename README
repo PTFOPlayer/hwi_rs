@@ -1,6 +1,7 @@
 hardware info app for linux
-Curently no support for Radeon and Intel GPU's but with Nvidia GPU's works with full functionality
-
+supports AMD and Nvidia gpu's
+AMD: from R600 chip (tested HD7000 and above)
+Nvidia: from GT8000 series ( tested Maxwell and above)
 Needed modules:
 pyqt5 (old TK version in /old)
 psutil
