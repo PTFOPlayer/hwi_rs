@@ -16,10 +16,8 @@
 #full support for all gpus newer than tesla 2.0 
 #tested on series: maxwell, pascal, turing 
 #radeon gpu's:
-#ROCM supports gpu's from GCN 1.0 to RDNA2
-#intel gpu's:
-#ROCM teoretically supports all intel gpu's from Igpu's from Intel core Gen4 to Xe series
-#intel gpu's support may be extended whem intel launches Xe series gpu's
+#support for all gpus from HD7000 series
+#tested on series: HD7000, RX400
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
