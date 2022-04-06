@@ -3,12 +3,13 @@ program to display the stats of a pc using the pyqt5 library
 author: WhiskyAKM (Patryk T)
 
 app works with the following os:
-windows 10 - partial support (only cpu cores and usage, ram, drives, network, nvidia gpu)
-linux - full support (cpu cores, usage, ram, drives, network, nvidia gpu)
-currently only works with nvidia gpu but can be extended to other gpu's
+windows 10 - partial support (only cpu cores, cpu usage, 
+                              cpu base clock, ram, drives,
+                              network, nvidia gpu)
+linux - full support (cpu cores, cpu usage, cpu temperature, 
+                      cpu current freq, usage, ram, drives, 
+                      network, nvidia gpu, radeon gpu's)
 
-radeon gpu's will be supported in the future by using the rocm-smi 
-usage of rocm may cause reduction of stats refresh rate and will cause large ram usage
 
 supported gpu's:
 
