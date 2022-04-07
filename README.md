@@ -6,7 +6,7 @@
 </p>
 
 # program to display the stats of a pc using the pyqt5 library 
->***author: WhiskyAKM (Patryk T) ***
+>**author: WhiskyAKM (Patryk T) **
 >
 >**app works with the following os:**
 >
