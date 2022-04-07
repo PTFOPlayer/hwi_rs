@@ -6,9 +6,10 @@
 </p>
 
 # program to display the stats of a pc using the pyqt5 library 
->author: WhiskyAKM (Patryk T)
-
->app works with the following os:
+>***author: WhiskyAKM (Patryk T) ***
+>
+>**app works with the following os:**
+>
 >windows 10 - partial support (only cpu cores, cpu usage, 
 >                              cpu base clock, ram, drives,
 >                              network, nvidia gpu)
@@ -23,7 +24,7 @@
 >**nvidia gpu's:**
 >full support for all gpus newer than tesla 2.0 
 >tested on series: maxwell, pascal, turing 
-
+>
 >**radeon gpu's:**
 >support for all gpus from HD7000 series
 >tested on series: HD7000, RX400
