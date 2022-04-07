@@ -5,7 +5,7 @@
   </a>
 </p>
 
-# program to display the stats of a pc using the pyqt5 library 
+# program to display the stats of a pc
 
 >**app works with the following os:**
 >
