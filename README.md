@@ -1,6 +1,6 @@
 
-program to display the stats of a pc using the pyqt5 library
-author: WhiskyAKM (Patryk T)
+#program to display the stats of a pc using the pyqt5 library \n
+**author: WhiskyAKM (Patryk T) ** \n
 
 app works with the following os:
 windows 10 - partial support (only cpu cores, cpu usage, 
