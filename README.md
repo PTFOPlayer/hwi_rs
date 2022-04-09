@@ -29,7 +29,7 @@
 >tested on series: HD7000, RX400
 
 # Needed modules:
->pyqt5 (old TK version in /old)
+>pyqt5 
 >
 >psutil
 >
