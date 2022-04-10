@@ -1,9 +1,0 @@
-{
-    "background": "#404040",
-    "font_color": "#F9DB24",
-    "font_size": "20px",
-    "font_family": "Arial",
-    "bar_color": "Grey",
-    "gpu":"nvidia"
-
-}
