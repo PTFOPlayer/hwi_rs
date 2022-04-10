@@ -23,13 +23,11 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import processes
-import json
+import configparser
 import cpuinfo
 
-with open('config.json') as configf:
-        #read json file
-        config = json.load(configf)
-        
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 class Window(QWidget):
       
@@ -39,9 +37,9 @@ class Window(QWidget):
         layout = QVBoxLayout()
         
         # setting font style
-        fontcolor = config.get('font_color')
-        fontsize = config.get('font_size')
-        fontfamily = config.get('font_family')
+        fontcolor = config['font']['color']
+        fontsize = config['font']['size']
+        fontfamily = config['font']['family']
         FontStyle = f"font-size: {fontsize}; color: {fontcolor}; font-family: {fontfamily};"
         
         # creating a label for cpu usage
@@ -75,7 +73,7 @@ class Window(QWidget):
         self.label_drive.setAlignment(Qt.AlignLeft)
         
         # setting progress bar style
-        barcolor = config.get('bar_color')
+        barcolor = config['bar']['color']
         bar_style = ("QProgressBar::chunk "
                     "{"
                     f"background-color: {barcolor};"
@@ -153,7 +151,7 @@ class Window(QWidget):
         
         # showing gpu usage in the label
         try:
-            if(config.get('gpu') == "nvidia"):   
+            if(config['gpu']['vendor'] == "nvidia"):   
                 gpu_usg = processes.nvd_gpuusg()
                 self.label_gpu.setText("\nGPU model : " + str(gpu_usg[0]) + "\n"
                                         + "GPU temperature in : " + str(gpu_usg[2]) + " °C \n"
@@ -164,7 +162,7 @@ class Window(QWidget):
                 gpu_mem = processes.nvd_gpumem()
                 self.label_gpu_mem.setText("GPU memory used : " + str(gpu_mem[0]) + "MB" +
                                         "\nGPU memory max : " + str(gpu_mem[1]) + "MB")
-            if(config.get('gpu') == "amd"):
+            if(config['gpu']['vendor'] == "amd"):
                 gpu_temp = processes.amd_gpuusg()
                 gpu_usg = gpu_temp[0]
                 gpu_mem = gpu_temp[1]
@@ -172,7 +170,7 @@ class Window(QWidget):
                 bar_gpu = int(gpu_usg)
                 self.progressBar_gpu.setValue(bar_gpu)
                 self.label_gpu_mem.setText("GPU memory used : " + str(gpu_mem))
-            if(config.get('gpu') == "intel"):
+            if(config['gpu']['vendor'] == "intel"):
                 self.label_gpu.setText("\n Intel GPU not supported")
                 self.progressBar_gpu.setValue(0)
         except:
@@ -195,7 +193,7 @@ App = QApplication(sys.argv)
 # create the instance of our Window
 window = Window()
 window.setWindowTitle("PC stats")
-bg = config.get("background")
+bg = config['app']['background']
 window.setStyleSheet(f"background-color: {bg};")
 
 # showing all the widgets
