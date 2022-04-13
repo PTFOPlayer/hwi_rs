@@ -293,23 +293,26 @@ class Ui_MainWindow(object):
         self.Ram_Bar.setValue(int(Ram_usg[2]))
         
         #GPU
-        if gpuconf == 'nvidia':
-            Gpu_usg = processes.nvd_gpuusg()
-            Gpu_mem = processes.nvd_gpumem()
-            self.Gpu_1.setText(f"<html><head/><body><p>{Gpu_usg[0]}<br/></p></body></html>")
-            self.Gpu_2.setText(f"<html><head/><body><p>Gpu temp : {Gpu_usg[2]}°C</p><p>Gpu power : {Gpu_usg[3]}W</p><p><br/></p></body></html>")
-            self.Gpu_3.setText(f"<html><head/><body><p>Gpu mem total : {Gpu_mem[1]}MB</p><p>Gpu mem used : {Gpu_mem[0]}MB</p><p><br/></p></body></html>")
-            self.Gpu_4.setText(f"<html><head/><body><p>Gpu usage : {Gpu_usg[1]}%</p><p><br/></p></body></html>")
-            self.Gpu_Bar.setValue(int(Gpu_usg[1]))
-        elif gpuconf == 'amd':
-            Gpu_usg = processes.amd_gpuusg()
-            self.Gpu_1.setText(f"<html><head/><body><p>AMD GPU (Name Not working yet)<br/></p></body></html>")
-            self.Gpu_2.setText(f"<html><head/><body><p>Gpu mem: {Gpu_usg[1]}</p><p><br/></p></body></html>")
-            self.Gpu_3.setText(f"<html><head/><body><p>to be worked on</p><p><br/></p></body></html>")
-            self.Gpu_4.setText(f"<html><head/><body><p>Gpu usage : {Gpu_usg[0]}</p><p><br/></p></body></html>")
-            self.Gpu_Bar.setValue(int(Gpu_usg[0]))
-        elif gpuconf == 'intel':
-            self.Gpu_1.setText(f"<html><head/><body><p>Intel not supported<br/></p></body></html>")
+        try:
+            if gpuconf == 'nvidia':
+                Gpu_usg = processes.nvd_gpuusg()
+                Gpu_mem = processes.nvd_gpumem()
+                self.Gpu_1.setText(f"<html><head/><body><p>{Gpu_usg[0]}<br/></p></body></html>")
+                self.Gpu_2.setText(f"<html><head/><body><p>Gpu temp : {Gpu_usg[2]}°C</p><p>Gpu power : {Gpu_usg[3]}W</p><p><br/></p></body></html>")
+                self.Gpu_3.setText(f"<html><head/><body><p>Gpu mem total : {Gpu_mem[1]}MB</p><p>Gpu mem used : {Gpu_mem[0]}MB</p><p><br/></p></body></html>")
+                self.Gpu_4.setText(f"<html><head/><body><p>Gpu usage : {Gpu_usg[1]}%</p><p><br/></p></body></html>")
+                self.Gpu_Bar.setValue(int(Gpu_usg[1]))
+            elif gpuconf == 'amd':
+                Gpu_usg = processes.amd_gpuusg()
+                self.Gpu_1.setText(f"<html><head/><body><p>AMD GPU (Name Not working yet)<br/></p></body></html>")
+                self.Gpu_2.setText(f"<html><head/><body><p>Gpu mem: {Gpu_usg[1]}</p><p><br/></p></body></html>")
+                self.Gpu_3.setText(f"<html><head/><body><p>to be worked on</p><p><br/></p></body></html>")
+                self.Gpu_4.setText(f"<html><head/><body><p>Gpu usage : {Gpu_usg[0]}</p><p><br/></p></body></html>")
+                self.Gpu_Bar.setValue(int(Gpu_usg[0]))
+            elif gpuconf == 'intel':
+                self.Gpu_1.setText(f"<html><head/><body><p>Intel not supported<br/></p></body></html>")
+        except:
+            self.Gpu_1.setText(f"<html><head/><body><p>Check config (vendor section)<br/></p></body></html>")
         
         #Drive and Net
         try:
