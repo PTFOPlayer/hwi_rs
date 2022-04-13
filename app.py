@@ -302,7 +302,12 @@ class Ui_MainWindow(object):
             self.Gpu_4.setText(f"<html><head/><body><p>Gpu usage : {Gpu_usg[1]}%</p><p><br/></p></body></html>")
             self.Gpu_Bar.setValue(int(Gpu_usg[1]))
         elif gpuconf == 'amd':
-            pass
+            Gpu_usg = processes.amd_gpuusg()
+            self.Gpu_1.setText(f"<html><head/><body><p>AMD GPU (Name Not working yet)<br/></p></body></html>")
+            self.Gpu_2.setText(f"<html><head/><body><p>Gpu mem: {Gpu_usg[1]}</p><p><br/></p></body></html>")
+            self.Gpu_3.setText(f"<html><head/><body><p>to be worked on</p><p><br/></p></body></html>")
+            self.Gpu_4.setText(f"<html><head/><body><p>Gpu usage : {Gpu_usg[0]}</p><p><br/></p></body></html>")
+            self.Gpu_Bar.setValue(int(Gpu_usg[0]))
         elif gpuconf == 'intel':
             self.Gpu_1.setText(f"<html><head/><body><p>Intel not supported<br/></p></body></html>")
         
