@@ -2,5 +2,5 @@
 Encoding=UTF-8
 Type=Application
 Terminal=false
-Exec=$HOME/PythonHardwareInfo-PYHI/PYHW
+Exec=bash ~/PythonHardwareInfo-PYHI/PYHW
 Name=PYHW
