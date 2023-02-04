@@ -23,9 +23,21 @@ impl App for HwiRs {
                 match get_cpu() {
                     Ok(data) => {
                         ui.label(data.name);
-                        ui.label(format!("{} Mhz", data.frequency));
-                        ui.label(format!("{} %", data.load));
-                        ui.label(format!("{} C", data.temperature));
+                        ui.label(format!("Cores: {}", data.cores));
+                        let mut col = false;
+                        ui.horizontal(|ui|{
+                            ui.collapsing("", |ui|{
+                                col = true;
+                                for i in 0..data.frequency.len() {
+                                    ui.label(format!("{}: {}", i, data.frequency[i]));
+                                }
+                            });
+                            if !col {
+                                ui.label(format!("Frequency: {} Mhz", data.frequency[0]));
+                            }
+                        });
+                        ui.label(format!("Avg one minut load: {} %", data.load));
+                        ui.label(format!("Temperature: {} C", data.temperature));
                     }
                     Err(_) => {
                         ui.label("cpu error");
