@@ -1,6 +1,9 @@
 use nvml_wrapper::{
-    enum_wrappers::device, enums::device::DeviceArchitecture, error::NvmlError,
-    struct_wrappers::device::Utilization, Nvml,
+    enum_wrappers::device,
+    enums::device::DeviceArchitecture,
+    error::NvmlError,
+    struct_wrappers::device::{PciInfo, Utilization},
+    Nvml,
 };
 pub struct NvData {
     pub spec: NvSpec,
@@ -12,6 +15,7 @@ pub struct NvSpec {
     pub memory: u64,
     pub cores: u32,
     pub arc: DeviceArchitecture,
+    pub pci: PciInfo,
 }
 
 pub struct NvUtil {
@@ -33,6 +37,7 @@ pub fn get_nv() -> Result<NvData, NvmlError> {
     let memory_bus = device.memory_bus_width()?;
     let cores = device.num_cores()?;
     let arc = device.architecture()?;
+    let pci = device.pci_info()?;
 
     let current_core_clock = device.clock(device::Clock::Graphics, device::ClockId::Current)?;
     let current_memory_clock = device.clock(device::Clock::Memory, device::ClockId::Current)?;
@@ -48,6 +53,7 @@ pub fn get_nv() -> Result<NvData, NvmlError> {
             memory: memory.total,
             cores,
             arc,
+            pci,
         },
         util: NvUtil {
             core_usage,

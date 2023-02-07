@@ -37,8 +37,11 @@ pub fn get_cpu() -> Result<CpuData, String> {
             }
 
             let sys = System::new();
-            let load = match sys.load_average() {
-                Ok(res) => res.one,
+            let load = match sys.cpu_load_aggregate() {
+                Ok(res) => match res.done() {
+                    Ok(res) => res.user + res.system,
+                    Err(_) => todo!(),
+                },
                 Err(_) => todo!(),
             };
 
