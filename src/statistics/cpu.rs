@@ -58,6 +58,6 @@ pub fn get_cpu() -> Result<CpuData, String> {
                 temperature,
             });
         }
-        Err(_) => todo!(),
+        Err(_) => return Err("CPU err".to_owned()),
     };
 }
