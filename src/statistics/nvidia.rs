@@ -1,8 +1,9 @@
 use nvml_wrapper::{
-    enum_wrappers::device,
+    enum_wrappers::device::{self, ComputeMode},
     enums::device::DeviceArchitecture,
     error::NvmlError,
     struct_wrappers::device::{PciInfo, Utilization},
+    structs::device::CudaComputeCapability,
     Nvml,
 };
 pub struct NvData {
@@ -16,6 +17,10 @@ pub struct NvSpec {
     pub cores: u32,
     pub arc: DeviceArchitecture,
     pub pci: PciInfo,
+    pub compute: ComputeMode,
+    pub cuda: CudaComputeCapability,
+    pub pci_e_gen: u32,
+    pub pci_e_width: u32,
 }
 
 pub struct NvUtil {
@@ -39,6 +44,11 @@ pub fn get_nv() -> Result<NvData, NvmlError> {
     let arc = device.architecture()?;
     let pci = device.pci_info()?;
 
+    let compute = device.compute_mode()?;
+    let cuda = device.cuda_compute_capability()?;
+    let pci_e_gen = device.current_pcie_link_gen()?;
+    let pci_e_width = device.current_pcie_link_width()?;
+
     let current_core_clock = device.clock(device::Clock::Graphics, device::ClockId::Current)?;
     let current_memory_clock = device.clock(device::Clock::Memory, device::ClockId::Current)?;
     let memory = device.memory_info()?;
@@ -54,6 +64,10 @@ pub fn get_nv() -> Result<NvData, NvmlError> {
             cores,
             arc,
             pci,
+            compute,
+            cuda,
+            pci_e_gen,
+            pci_e_width,
         },
         util: NvUtil {
             core_usage,
