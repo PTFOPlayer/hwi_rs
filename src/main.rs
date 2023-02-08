@@ -1,5 +1,10 @@
+use std::process::exit;
+
 use eframe::{egui::CentralPanel, egui_glow, run_native, App, NativeOptions};
 use egui::{self, style::Margin, Pos2, Vec2};
+use serde::Deserialize;
+use toml;
+
 mod statistics;
 
 mod overlay;
@@ -7,6 +12,27 @@ use overlay::*;
 
 mod app_ui;
 use app_ui::*;
+
+#[derive(Deserialize)]
+struct Keys {
+    pub transparent: bool,
+}
+
+#[derive(Deserialize)]
+struct Config {
+    pub keys: Keys,
+}
+
+fn settings() -> Config {
+    let file = std::fs::read_to_string("./src/settings.toml");
+    match file {
+        Ok(res) => toml::from_str(res.as_str()).unwrap(),
+        Err(_) => {
+            println!("error reading settings");
+            exit(-1)
+        }
+    }
+}
 
 #[derive(Default)]
 struct HwiRs;
@@ -18,7 +44,6 @@ impl HwiRs {
 }
 
 static mut UI_T: bool = false;
-static mut TRANSPARENT: bool = false;
 impl App for HwiRs {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         let normal = egui::Color32::from_rgba_premultiplied(10, 10, 10, 255);
@@ -32,7 +57,7 @@ impl App for HwiRs {
             },
             shadow: eframe::epaint::Shadow {
                 extrusion: 0.0,
-                color: normal,
+                color: tranparent,
             },
             fill: normal,
             stroke: egui::Stroke::new(0.0, normal),
@@ -49,12 +74,10 @@ impl App for HwiRs {
                 bottom: 1.,
             },
         };
-        unsafe {
-            if TRANSPARENT {
-                my_frame.stroke.color = tranparent;
-                my_frame.fill = tranparent;
-                my_frame.shadow.color = tranparent;
-            }
+        if settings().keys.transparent {
+            my_frame.stroke.color = tranparent;
+            my_frame.fill = tranparent;
+            my_frame.shadow.color = tranparent;
         }
         CentralPanel::default()
             .frame(my_frame)
@@ -62,7 +85,6 @@ impl App for HwiRs {
                 if UI_T {
                     ui.horizontal(|ui| {
                         ui.checkbox(&mut UI_T, "overlay");
-                        ui.checkbox(&mut TRANSPARENT, "transparent");
                     });
                     frame.set_window_pos(Pos2 { x: 100., y: 0. });
                     frame.set_decorations(false);
@@ -72,7 +94,21 @@ impl App for HwiRs {
                 } else {
                     ui.horizontal(|ui| {
                         ui.checkbox(&mut UI_T, "overlay");
-                        ui.checkbox(&mut TRANSPARENT, "transparent");
+                        ui.menu_button("Settings", |ui| {
+                            let t_state = &mut settings().keys.transparent.clone();
+                            if ui.checkbox(t_state, "transparent").changed() {
+                                _ = std::fs::write(
+                                    "./src/settings.toml",
+                                    format!(
+                                        "
+[keys]
+transparent = {}
+                                    ",
+                                        !settings().keys.transparent
+                                    ),
+                                );
+                            }
+                        });
                     });
                     frame.set_decorations(true);
                     frame.set_always_on_top(false);
@@ -103,10 +139,10 @@ fn main() {
         transparent: true,
         mouse_passthrough: false,
         vsync: false,
-        multisampling: 2,
+        multisampling: 0,
         depth_buffer: 2,
         stencil_buffer: 8,
-        hardware_acceleration: eframe::HardwareAcceleration::Preferred,
+        hardware_acceleration: eframe::HardwareAcceleration::Required,
         renderer: eframe::Renderer::Glow,
         follow_system_theme: false,
         default_theme: eframe::Theme::Dark,

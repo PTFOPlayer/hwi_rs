@@ -36,18 +36,19 @@ pub fn get_cpu() -> Result<CpuData, String> {
                 }
             }
 
+            
             let sys = System::new();
             let load = match sys.cpu_load_aggregate() {
                 Ok(res) => match res.done() {
                     Ok(res) => res.user + res.system,
-                    Err(_) => todo!(),
+                    Err(_) => return  Err("CPU err".to_owned()),
                 },
-                Err(_) => todo!(),
+                Err(_) => return  Err("CPU err".to_owned()),
             };
 
             let temperature = match sys.cpu_temp() {
                 Ok(res) => res,
-                Err(_) => todo!(),
+                Err(_) => return  Err("CPU err".to_owned()),
             };
             return Ok(CpuData {
                 name: name.to_owned(),

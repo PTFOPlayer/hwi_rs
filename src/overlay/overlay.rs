@@ -24,7 +24,10 @@ pub fn overlay_ui(ui: &mut Ui) {
                     );
                 }
                 if data.temperature < 65. {
-                    ui.label(format!("{}°C", data.temperature));
+                    ui.colored_label(
+                        egui::Color32::from_rgb(255, 255, 255),
+                        format!("{}°C", data.temperature),
+                    );
                 } else {
                     ui.colored_label(
                         egui::Color32::from_rgb(255, 50, 50),
@@ -52,7 +55,10 @@ pub fn overlay_ui(ui: &mut Ui) {
                     ),
                 );
                 if data.util.temperature < 65 {
-                    ui.label(format!("{}°C", data.util.temperature));
+                    ui.colored_label(
+                        egui::Color32::from_rgb(255, 255, 255),
+                        format!("{}°C", data.util.temperature),
+                    );
                 } else {
                     ui.colored_label(
                         egui::Color32::from_rgb(255, 50, 50),
