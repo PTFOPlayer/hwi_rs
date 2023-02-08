@@ -1,9 +1,12 @@
 use eframe::{egui::CentralPanel, run_native, App, NativeOptions};
-use egui::{self, Pos2, Ui, Vec2};
+use egui::{self, style::Margin, Pos2, Ui, Vec2};
 use std::time::Duration;
 
 mod statistics;
 use statistics::*;
+
+mod overlay;
+use overlay::*;
 
 #[derive(Default)]
 struct HwiRs;
@@ -17,26 +20,54 @@ impl HwiRs {
 static mut UI_T: bool = false;
 impl App for HwiRs {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
-        
-        
-        CentralPanel::default().show(ctx, |ui| unsafe {
-            ui.horizontal(|ui| {
-                ui.checkbox(&mut UI_T, "overlay")
+        let my_frame = egui::containers::Frame {
+            rounding: egui::Rounding {
+                nw: 0.0,
+                ne: 0.0,
+                sw: 0.0,
+                se: 0.0,
+            },
+            shadow: eframe::epaint::Shadow {
+                extrusion: 100.0,
+                color: egui::Color32::from_rgba_premultiplied(0, 0, 0, 0),
+            },
+            fill: egui::Color32::from_rgba_premultiplied(0, 0, 0, 0),
+            stroke: egui::Stroke::new(0.0, egui::Color32::TEMPORARY_COLOR),
+            inner_margin: Margin {
+                left: 1.,
+                right: 1.,
+                top: 1.,
+                bottom: 1.,
+            },
+            outer_margin: Margin {
+                left: 1.,
+                right: 1.,
+                top: 1.,
+                bottom: 1.,
+            },
+        };
+        CentralPanel::default()
+            .frame(my_frame)
+            .show(ctx, |ui| unsafe {
+                if UI_T {
+                    ui.horizontal(|ui| ui.checkbox(&mut UI_T, "overlay"));
+                    frame.set_window_pos(Pos2 { x: 100., y: 0. });
+                    frame.set_decorations(false);
+                    frame.set_window_size(Vec2 { x: 250., y: 90. });
+                    frame.set_always_on_top(true);
+                    overlay_ui(ui);
+                } else {
+                    ui.horizontal(|ui| ui.checkbox(&mut UI_T, "overlay"));
+                    frame.set_decorations(true);
+                    frame.set_always_on_top(false);
+                    egui::ScrollArea::vertical()
+                        .always_show_scroll(true)
+                        .show(ui, |ui| {
+                            cpu_ui(ui);
+                            gpu_ui(ui);
+                        });
+                }
             });
-            if UI_T {
-                frame.set_window_pos(Pos2 { x: 100., y: 0. });
-                frame.set_decorations(false);
-                frame.set_window_size(Vec2 { x: 320., y: 90. });
-                frame.set_always_on_top(true);
-                overlay_ui(ui);
-            } else {
-                frame.set_decorations(true);
-                frame.set_always_on_top(false);
-                frame.set_window_size(Vec2 { x: 450., y: 250. });
-                cpu_ui(ui);
-                gpu_ui(ui);
-            }
-        });
     }
 }
 
@@ -71,58 +102,6 @@ fn cpu_ui(ui: &mut Ui) {
         .ctx
         .request_repaint_after(Duration::from_secs_f32(0.1));
     });
-}
-
-fn overlay_ui(ui: &mut Ui) {
-    match get_cpu() {
-        Ok(data) => {
-            ui.horizontal(|ui| {
-                ui.colored_label(egui::Color32::from_rgb(000, 104, 181), "CPU");
-                ui.label(format!("{}MHz", data.frequency[0]));
-                let load = (data.load * 100.).round() as i32;
-                let load_prev = 0;
-                if load != 0 {
-                    ui.label(format!("{}%", load));
-                } else {
-                    ui.label(format!("{}%", load_prev));
-                }
-                ui.label(format!("{}°C", data.temperature));
-            })
-            .response
-            .ctx
-            .request_repaint_after(Duration::from_secs_f32(0.5));
-        }
-        Err(_) => {
-            ui.label("cpu error");
-        }
-    }
-    match get_nv() {
-        Ok(data) => {
-            ui.horizontal(|ui| {
-                ui.colored_label(egui::Color32::from_rgb(118, 185, 000), "GPU core");
-                ui.label(format!(
-                    "{}MHz\t{}%\t{}°C",
-                    data.util.current_core_clock, data.util.core_usage.gpu, data.util.temperature
-                ));
-            })
-            .response
-            .ctx
-            .request_repaint_after(Duration::from_secs_f32(0.5));
-            ui.horizontal(|ui| {
-                ui.colored_label(egui::Color32::from_rgb(118, 185, 000), "GPU mem");
-                ui.label(format!(
-                    "{}MHz\t{}%\t{}MB",
-                    data.util.current_memory_clock, data.util.core_usage.memory, data.util.memory_used / 1024 / 1024
-                ));
-            })
-            .response
-            .ctx
-            .request_repaint_after(Duration::from_secs_f32(0.5));
-        }
-        Err(_) => {
-            ui.label("gpu error");
-        }
-    }
 }
 
 fn gpu_ui(ui: &mut Ui) {
@@ -190,9 +169,9 @@ fn main() {
         transparent: true,
         mouse_passthrough: false,
         vsync: false,
-        multisampling: 0,
-        depth_buffer: 0,
-        stencil_buffer: 0,
+        multisampling: 2,
+        depth_buffer: 1,
+        stencil_buffer: 8,
         hardware_acceleration: eframe::HardwareAcceleration::Preferred,
         renderer: eframe::Renderer::Glow,
         follow_system_theme: false,
