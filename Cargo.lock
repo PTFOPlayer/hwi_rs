@@ -917,6 +917,7 @@ dependencies = [
  "itertools",
  "lazy_static",
  "nvml-wrapper",
+ "raw-cpuid",
  "serde",
  "systemstat",
  "toml",
@@ -1421,6 +1422,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8856d8364d252a14d474036ea1358d63c9e6965c8e5c1885c18f73d70bff9c7b"
 dependencies = [
  "proc-macro2",
+]
+
+[[package]]
+name = "raw-cpuid"
+version = "10.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c307f7aacdbab3f0adee67d52739a1d71112cc068d6fab169ddeb18e48877fad"
+dependencies = [
+ "bitflags",
 ]
 
 [[package]]

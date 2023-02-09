@@ -1,9 +1,5 @@
-use std::process::exit;
-
 use eframe::{egui::CentralPanel, egui_glow, run_native, App, NativeOptions};
 use egui::{self, style::Margin, Pos2, Vec2};
-use serde::Deserialize;
-use toml;
 
 mod statistics;
 
@@ -13,26 +9,8 @@ use overlay::*;
 mod app_ui;
 use app_ui::*;
 
-#[derive(Deserialize)]
-struct Keys {
-    pub transparent: bool,
-}
-
-#[derive(Deserialize)]
-struct Config {
-    pub keys: Keys,
-}
-
-fn settings() -> Config {
-    let file = std::fs::read_to_string("./src/settings.toml");
-    match file {
-        Ok(res) => toml::from_str(res.as_str()).unwrap(),
-        Err(_) => {
-            println!("error reading settings");
-            exit(-1)
-        }
-    }
-}
+mod settings_ui;
+use settings_ui::*;
 
 #[derive(Default)]
 struct HwiRs;
@@ -43,11 +21,11 @@ impl HwiRs {
     }
 }
 
-static mut UI_T: bool = false;
 impl App for HwiRs {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
-        let normal = egui::Color32::from_rgba_premultiplied(10, 10, 10, 255);
-        let tranparent = egui::Color32::from_rgba_premultiplied(15, 15, 15, 0);
+        let normal = egui::Color32::from_rgba_premultiplied(15, 15, 15, 255);
+        let tranparent =
+            egui::Color32::from_rgba_premultiplied(15, 15, 15, get_settings().keys.opacity as u8);
         let mut my_frame = egui::containers::Frame {
             rounding: egui::Rounding {
                 nw: 0.0,
@@ -74,55 +52,36 @@ impl App for HwiRs {
                 bottom: 1.,
             },
         };
-        if settings().keys.transparent {
+        if get_settings().keys.transparent {
             my_frame.stroke.color = tranparent;
             my_frame.fill = tranparent;
             my_frame.shadow.color = tranparent;
         }
-        CentralPanel::default()
-            .frame(my_frame)
-            .show(ctx, |ui| unsafe {
-                if UI_T {
-                    ui.horizontal(|ui| {
-                        ui.checkbox(&mut UI_T, "overlay");
+        CentralPanel::default().frame(my_frame).show(ctx, |ui| {
+            if mode() {
+                settings_ui(ui);
+                frame.set_window_pos(Pos2 {
+                    x: get_settings().keys.overlay_x,
+                    y: get_settings().keys.overlay_y,
+                });
+                frame.set_decorations(false);
+                frame.set_window_size(Vec2 { x: 250., y: 90. });
+                frame.set_always_on_top(true);
+                overlay_ui(ui);
+            } else {
+                settings_ui(ui);
+                frame.set_decorations(true);
+                frame.set_always_on_top(false);
+                egui::ScrollArea::vertical()
+                    .always_show_scroll(true)
+                    .show(ui, |ui| {
+                        cpu_ui(ui);
+                        gpu_ui(ui);
                     });
-                    frame.set_window_pos(Pos2 { x: 100., y: 0. });
-                    frame.set_decorations(false);
-                    frame.set_window_size(Vec2 { x: 250., y: 90. });
-                    frame.set_always_on_top(true);
-                    overlay_ui(ui);
-                } else {
-                    ui.horizontal(|ui| {
-                        ui.checkbox(&mut UI_T, "overlay");
-                        ui.menu_button("Settings", |ui| {
-                            let t_state = &mut settings().keys.transparent.clone();
-                            if ui.checkbox(t_state, "transparent").changed() {
-                                _ = std::fs::write(
-                                    "./src/settings.toml",
-                                    format!(
-                                        "
-[keys]
-transparent = {}
-                                    ",
-                                        !settings().keys.transparent
-                                    ),
-                                );
-                            }
-                        });
-                    });
-                    frame.set_decorations(true);
-                    frame.set_always_on_top(false);
-                    egui::ScrollArea::vertical()
-                        .always_show_scroll(true)
-                        .show(ui, |ui| {
-                            cpu_ui(ui);
-                            gpu_ui(ui);
-                        });
-                }
-            });
+            }
+        });
     }
 }
-
 fn main() {
     let options = NativeOptions {
         always_on_top: true,
