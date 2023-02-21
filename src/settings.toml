@@ -1,6 +1,7 @@
 [keys]
 mode = false
 transparent = true
-opacity = 87
-overlay_x = 100.0
+settings_always = true
+opacity = 150
+overlay_x = 0.0
 overlay_y = 0.0

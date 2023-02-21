@@ -7,6 +7,7 @@ use toml;
 pub struct Keys {
     pub mode: bool,
     pub transparent: bool,
+    pub settings_always: bool,
     pub opacity: u8,
     pub overlay_x: f32,
     pub overlay_y: f32,
@@ -40,12 +41,21 @@ pub fn settings_ui(ui: &mut Ui) {
                 toml::to_string(&confing_to_write).unwrap(),
             );
         };
-        if !current_settings.keys.mode {
+        if !current_settings.keys.mode || current_settings.keys.settings_always {
             ui.menu_button("Settings", |ui| {
                 let t_state = &mut current_settings.keys.transparent.clone();
                 if ui.checkbox(t_state, "transparent").changed() {
                     let mut confing_to_write = current_settings.clone();
                     confing_to_write.keys.transparent = !current_settings.keys.transparent;
+                    _ = std::fs::write(
+                        "./src/settings.toml",
+                        toml::to_string(&confing_to_write).unwrap(),
+                    );
+                }
+                let s_state = &mut current_settings.keys.settings_always.clone();
+                if ui.checkbox(s_state, "settings always on").changed() {
+                    let mut confing_to_write = current_settings.clone();
+                    confing_to_write.keys.settings_always = !current_settings.keys.settings_always;
                     _ = std::fs::write(
                         "./src/settings.toml",
                         toml::to_string(&confing_to_write).unwrap(),

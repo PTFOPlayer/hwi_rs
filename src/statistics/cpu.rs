@@ -2,7 +2,6 @@ use itertools::Itertools;
 use std::fs;
 use systemstat::{Platform, System};
 use raw_cpuid::{self, CacheParametersIter};
-use smbioslib::*;
 pub struct CpuData {
     pub name: String,
     pub cores: String,
@@ -58,12 +57,7 @@ pub fn get_cpu() -> Result<CpuData, String> {
                 Some(res) => res,
                 None => return Err("CPU err".to_owned()),
             };
-            let temp = smbioslib::table_load_from_device().unwrap();
-            for i in temp {
-                if i.strings.contains(){
-                    println!("{:?}", i.strings)
-                }
-            }
+
             return Ok(CpuData {
                 name: name.to_owned(),
                 cores: cores.to_owned(),
