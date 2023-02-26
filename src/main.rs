@@ -60,12 +60,9 @@ impl App for HwiRs {
         CentralPanel::default().frame(my_frame).show(ctx, |ui| {
             if mode() {
                 settings_ui(ui);
-                let pos_x = get_settings().keys.overlay_x + (250/2) as f32;
+                let pos_x = get_settings().keys.overlay_x + (250 / 2) as f32;
                 let pos_y = get_settings().keys.overlay_y;
-                frame.set_window_pos(Pos2 {
-                    x: pos_x,
-                    y: pos_y,
-                });
+                frame.set_window_pos(Pos2 { x: pos_x, y: pos_y });
                 frame.set_decorations(false);
                 frame.set_window_size(Vec2 { x: 250., y: 90. });
                 frame.set_always_on_top(true);

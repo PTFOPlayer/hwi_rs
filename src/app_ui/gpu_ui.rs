@@ -1,6 +1,7 @@
+use std::time::Duration;
+
 use crate::statistics::*;
 use egui::Ui;
-use systemstat::Duration;
 
 pub fn gpu_ui(ui: &mut Ui) {
     ui.collapsing("GPU", |ui| {

@@ -23,7 +23,7 @@ pub fn overlay_ui(ui: &mut Ui) {
                         format!("{}%", LOAD_PREV),
                     );
                 }
-                if data.temperature < 65. {
+                if data.temperature < 65 {
                     ui.colored_label(
                         egui::Color32::from_rgb(255, 255, 255),
                         format!("{}°C", data.temperature),

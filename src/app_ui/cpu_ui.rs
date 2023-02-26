@@ -1,6 +1,7 @@
+use std::time::Duration;
+
 use crate::statistics::*;
 use egui::Ui;
-use systemstat::Duration;
 
 pub fn cpu_ui(ui: &mut Ui) {
     ui.push_id(79, |ui| {
@@ -23,16 +24,24 @@ pub fn cpu_ui(ui: &mut Ui) {
                     });
                     ui.label(format!("Avg one minut load: {} %", data.load));
                     ui.label(format!("Temperature: {} °C", data.temperature));
-                    ui.collapsing("advanced spec", |ui|{
+                    ui.collapsing("advanced spec", |ui| {
                         for cache in data.cache {
-                            let size = cache.associativity() * cache.physical_line_partitions() * cache.coherency_line_size() * cache.sets();
-                            
-                            ui.label(format!("{} cache level {}: {} KB", cache.cache_type(), cache.level(), size / 1024));
+                            let size = cache.associativity()
+                                * cache.physical_line_partitions()
+                                * cache.coherency_line_size()
+                                * cache.sets();
+
+                            ui.label(format!(
+                                "{} cache level {}: {} KB",
+                                cache.cache_type(),
+                                cache.level(),
+                                size / 1024
+                            ));
                         }
                     });
                 }
-                Err(_) => {
-                    ui.label("cpu error");
+                Err(err) => {
+                    ui.label(err);
                 }
             };
         })
