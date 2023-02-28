@@ -57,5 +57,5 @@ pub fn gpu_ui(ui: &mut Ui) {
     })
     .header_response
     .ctx
-    .request_repaint_after(Duration::from_secs_f32(0.1));
+    .request_repaint_after(Duration::from_secs_f32(0.2));
 }

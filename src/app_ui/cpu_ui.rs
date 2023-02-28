@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{time::Duration};
 
 use crate::statistics::*;
 use egui::Ui;
@@ -9,7 +9,8 @@ pub fn cpu_ui(ui: &mut Ui) {
             match get_cpu() {
                 Ok(data) => {
                     ui.label(data.name);
-                    ui.label(format!("Cores: {}", data.cores));
+                    ui.label(format!("Cores: {}", data.physical_cores));
+                    ui.label(format!("Threads: {}", data.logical_cores));
                     let mut col = false;
                     ui.horizontal(|ui| {
                         ui.collapsing("", |ui| {
@@ -22,8 +23,11 @@ pub fn cpu_ui(ui: &mut Ui) {
                             ui.label(format!("Frequency: {} MHz", data.frequency[0]));
                         }
                     });
-                    ui.label(format!("Avg one minut load: {} %", data.load));
+                    ui.label(format!("load: {} %", data.load));
                     ui.label(format!("Temperature: {} °C", data.temperature));
+                    ui.collapsing("advanced usage", |ui| {
+                        ui.label(format!("Voltage: {}V", data.voltage));
+                    });
                     ui.collapsing("advanced spec", |ui| {
                         for cache in data.cache {
                             let size = cache.associativity()
@@ -38,6 +42,13 @@ pub fn cpu_ui(ui: &mut Ui) {
                                 size / 1024
                             ));
                         }
+                        if data.hyper_threading == 1 {
+                            ui.label(format!("hyper threading: true"));
+                        } else if data.hyper_threading > 1 {
+                            ui.label(format!("advanced form of ht"));
+                        } else {
+                            ui.label(format!("hyper threading: false"));
+                        }
                     });
                 }
                 Err(err) => {
@@ -47,6 +58,6 @@ pub fn cpu_ui(ui: &mut Ui) {
         })
         .header_response
         .ctx
-        .request_repaint_after(Duration::from_secs_f32(0.1));
+        .request_repaint_after(Duration::from_secs_f32(0.2));
     });
 }
