@@ -17,6 +17,7 @@ pub struct CpuData {
 #[derive(Deserialize, Serialize, Clone)]
 pub struct CpuMsr {
     pub vendor: String,
+    pub name: String,
     pub power: f32,
     pub voltage: f32,
     pub usage: f32,
@@ -32,7 +33,6 @@ pub struct Msr {
 }
 
 pub fn get_cpu() -> Result<CpuData, String> {
-    let mut name = "".to_owned();
     let per_core_frequency;
     match fs::read_to_string("/proc/cpuinfo") {
         Ok(res) => {
@@ -46,9 +46,6 @@ pub fn get_cpu() -> Result<CpuData, String> {
                     if s_local[i].contains("MHz") {
                         freq.append(&mut vec![s_local[i + 2][2..].to_owned()]);
                     }
-                    if s_local[i].contains("model name") {
-                        name = (&s_local[i + 1][2..]).to_owned();
-                    }
                 }
                 freq
             };
@@ -56,41 +53,41 @@ pub fn get_cpu() -> Result<CpuData, String> {
         Err(err) => return Err(err.to_string()),
     };
 
-            let cpuid = raw_cpuid::CpuId::new();
-            let cache = match cpuid.get_cache_parameters() {
-                Some(res) => res,
-                None => return Err("CPU err".to_owned()),
-            };
+    let cpuid = raw_cpuid::CpuId::new();
+    let cache = match cpuid.get_cache_parameters() {
+        Some(res) => res,
+        None => return Err("CPU err".to_owned()),
+    };
 
-            let msr: Msr = {
-                match std::fs::read_to_string("/msr_data.toml") {
-                    Ok(res) => match toml::from_str(res.as_str()) {
-                        Ok(res) => res,
-                        Err(_) => return Err("error decoding MSR data file".to_owned()),
-                    },
-                    Err(_) => return Err("error reading MSR data file".to_owned()),
-                }
-            };
+    let msr: Msr = {
+        match std::fs::read_to_string("/msr_data.toml") {
+            Ok(res) => match toml::from_str(res.as_str()) {
+                Ok(res) => res,
+                Err(_) => return Err("error decoding MSR data file".to_owned()),
+            },
+            Err(_) => return Err("error reading MSR data file".to_owned()),
+        }
+    };
+    
+    let name = msr.cpu.name;
+    let load = msr.cpu.usage;
+    let temperature = msr.cpu.temperature;
+    let logical_cores = msr.cpu.logical_cores;
+    let physical_cores = msr.cpu.physical_cores;
+    let voltage = msr.cpu.voltage;
+    let hyper_threading = msr.cpu.hyper_threading;
+    let power = msr.cpu.power;
 
-            let load = msr.cpu.usage;
-            let temperature = msr.cpu.temperature;
-            let logical_cores = msr.cpu.logical_cores;
-            let physical_cores = msr.cpu.physical_cores;
-            let voltage = msr.cpu.voltage;
-            let hyper_threading = msr.cpu.hyper_threading;
-            let power = msr.cpu.power;
-
-            return Ok(CpuData {
-                name: name.to_owned(),
-                logical_cores,
-                physical_cores,
-                frequency: per_core_frequency,
-                voltage,
-                power,
-                load,
-                temperature,
-                cache,
-                hyper_threading,
-            });
-
+    return Ok(CpuData {
+        name,
+        logical_cores,
+        physical_cores,
+        frequency: per_core_frequency,
+        voltage,
+        power,
+        load,
+        temperature,
+        cache,
+        hyper_threading,
+    });
 }

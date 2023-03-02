@@ -6,10 +6,12 @@ use nvml_wrapper::{
     structs::device::CudaComputeCapability,
     Nvml,
 };
+
 pub struct NvData {
     pub spec: NvSpec,
     pub util: NvUtil,
 }
+
 pub struct NvSpec {
     pub name: String,
     pub memory_bus: u32,
@@ -31,10 +33,9 @@ pub struct NvUtil {
     pub current_core_clock: u32,
     pub current_memory_clock: u32,
 }
-
 pub fn get_nv() -> Result<NvData, NvmlError> {
     let nvml = Nvml::init()?;
-    // Get the first `Device` (GPU) in the system
+
     let device = nvml.device_by_index(0)?;
 
     let name = device.name()?;

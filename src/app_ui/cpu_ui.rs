@@ -1,4 +1,4 @@
-use std::{time::Duration};
+use std::time::Duration;
 
 use crate::statistics::*;
 use egui::Ui;
