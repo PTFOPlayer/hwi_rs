@@ -68,7 +68,7 @@ pub fn get_cpu() -> Result<CpuData, String> {
             Err(_) => return Err("error reading MSR data file".to_owned()),
         }
     };
-    
+
     let name = msr.cpu.name;
     let load = msr.cpu.usage;
     let temperature = msr.cpu.temperature;

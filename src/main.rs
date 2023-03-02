@@ -82,7 +82,6 @@ impl App for HwiRs {
     }
 }
 fn main() {
-    statistics::get_intel_gpu();
     let options = NativeOptions {
         always_on_top: true,
         maximized: false,
