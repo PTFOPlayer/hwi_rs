@@ -12,12 +12,12 @@ pub struct IgData {
 }
 
 // sudo intel_gpu_top -o - | awk '{print>"current";close("current")}'
-pub fn get_intel_gpu() -> Result<IgData, String> {
+pub fn get_intel_gpu() -> Result<IgData, ()> {
     let mut getter = Command::new("cat");
     getter.arg("./current");
     let s = match getter.output() {
         Ok(res) => String::from_utf8(res.stdout).unwrap(),
-        Err(_) => return Err("error ocured reading data".to_owned()),
+        Err(_) => return Err(()),
     };
 
     let splitted = s.split_ascii_whitespace().collect::<Vec<&str>>();

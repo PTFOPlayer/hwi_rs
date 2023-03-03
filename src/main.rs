@@ -1,15 +1,15 @@
+use std::process::Command;
+
 use eframe::{egui::CentralPanel, egui_glow, run_native, App, NativeOptions};
 use egui::{self, style::Margin, Pos2, Vec2};
 
 mod statistics;
 
 mod overlay;
-use overlay::*;
-
 mod app_ui;
-use app_ui::*;
-
 mod settings_ui;
+use overlay::*;
+use app_ui::*;
 use settings_ui::*;
 
 #[derive(Default)]
@@ -52,11 +52,13 @@ impl App for HwiRs {
                 bottom: 1.,
             },
         };
+        
         if get_settings().keys.transparent {
             my_frame.stroke.color = tranparent;
             my_frame.fill = tranparent;
             my_frame.shadow.color = tranparent;
         }
+
         CentralPanel::default().frame(my_frame).show(ctx, |ui| {
             if mode() {
                 settings_ui(ui);
@@ -82,6 +84,9 @@ impl App for HwiRs {
     }
 }
 fn main() {
+    let mut msr = Command::new("systemctl");
+    msr.arg("start").arg("msr_server.service");
+    _ = msr.output();
     let options = NativeOptions {
         always_on_top: true,
         maximized: false,
@@ -109,5 +114,8 @@ fn main() {
         shader_version: Some(egui_glow::ShaderVersion::Es300),
         centered: false,
     };
-    run_native("hwi_rs", options, Box::new(|cc| Box::new(HwiRs::new(cc))));
+    match run_native("hwi_rs", options, Box::new(|cc| Box::new(HwiRs::new(cc)))){
+        Ok(_) => {},
+        Err(err) => {println!("error strating app: {}", err)},
+    };
 }
