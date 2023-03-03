@@ -20,7 +20,7 @@ pub fn get_intel_ui(ui: &mut Ui) {
                 ui.label("vcs -> vector command streamer");
                 ui.label("vecs -> video enhancement engine command streamer");
             });
-        },
+        }
         Err(_) => todo!(),
     };
 }

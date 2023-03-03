@@ -56,7 +56,7 @@ pub fn get_nv() -> Result<NvData, NvmlError> {
     let core_usage = device.utilization_rates()?;
     let temperature =
         device.temperature(nvml_wrapper::enum_wrappers::device::TemperatureSensor::Gpu)?;
-    
+
     let data = NvData {
         spec: NvSpec {
             name,

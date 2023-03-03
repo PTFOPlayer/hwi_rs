@@ -42,6 +42,6 @@ pub fn get_intel_gpu() -> Result<IgData, ()> {
         rcs_usg,
         bcs_usg,
         vcs_usg,
-        vecs_usg
+        vecs_usg,
     })
 }

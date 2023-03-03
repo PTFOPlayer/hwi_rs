@@ -5,11 +5,11 @@ use egui::{self, style::Margin, Pos2, Vec2};
 
 mod statistics;
 
-mod overlay;
 mod app_ui;
+mod overlay;
 mod settings_ui;
-use overlay::*;
 use app_ui::*;
+use overlay::*;
 use settings_ui::*;
 
 #[derive(Default)]
@@ -52,7 +52,7 @@ impl App for HwiRs {
                 bottom: 1.,
             },
         };
-        
+
         if get_settings().keys.transparent {
             my_frame.stroke.color = tranparent;
             my_frame.fill = tranparent;
@@ -114,8 +114,10 @@ fn main() {
         shader_version: Some(egui_glow::ShaderVersion::Es300),
         centered: false,
     };
-    match run_native("hwi_rs", options, Box::new(|cc| Box::new(HwiRs::new(cc)))){
-        Ok(_) => {},
-        Err(err) => {println!("error strating app: {}", err)},
+    match run_native("hwi_rs", options, Box::new(|cc| Box::new(HwiRs::new(cc)))) {
+        Ok(_) => {}
+        Err(err) => {
+            println!("error strating app: {}", err)
+        }
     };
 }

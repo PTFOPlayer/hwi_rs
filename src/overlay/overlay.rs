@@ -3,26 +3,20 @@ use std::time::Duration;
 
 use crate::statistics::*;
 
-static mut LOAD_PREV: i32 = 0;
 pub fn overlay_ui(ui: &mut Ui) {
     match get_cpu() {
         Ok(data) => {
-            ui.horizontal(|ui| unsafe {
+            ui.horizontal(|ui| {
                 ui.colored_label(egui::Color32::from_rgb(000, 104, 181), "CPU");
                 ui.colored_label(
                     egui::Color32::from_rgb(255, 255, 255),
                     format!("{}MHz", data.frequency[0]),
                 );
-                let load = (data.load * 100.).round() as i32;
-                if load != 0 {
-                    ui.colored_label(egui::Color32::from_rgb(255, 255, 255), format!("{}%", load));
-                    LOAD_PREV = load;
-                } else {
-                    ui.colored_label(
-                        egui::Color32::from_rgb(255, 255, 255),
-                        format!("{}%", LOAD_PREV),
-                    );
-                }
+                ui.colored_label(
+                    egui::Color32::from_rgb(255, 255, 255),
+                    format!("{}%", data.load),
+                );
+
                 if data.temperature < 65 {
                     ui.colored_label(
                         egui::Color32::from_rgb(255, 255, 255),

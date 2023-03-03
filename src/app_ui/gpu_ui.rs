@@ -3,7 +3,7 @@ use std::time::Duration;
 use egui::Ui;
 
 mod gpus;
-use self::gpus::{get_nvidia_ui, get_intel_ui};
+use self::gpus::{get_intel_ui, get_nvidia_ui};
 
 pub fn gpu_ui(ui: &mut Ui) {
     ui.collapsing("GPU", |ui| {
