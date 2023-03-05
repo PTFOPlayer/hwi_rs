@@ -1,5 +1,5 @@
 use git2::Repository;
-use std::process::{exit, Command};
+use std::process::{Command};
 fn main() {
     let mut rm = Command::new("rm");
     rm.arg("-rf").arg("./msr_server");

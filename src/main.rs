@@ -84,9 +84,30 @@ impl App for HwiRs {
     }
 }
 fn main() {
+    //start msr_server
     let mut msr = Command::new("systemctl");
     msr.arg("start").arg("msr_server.service");
     _ = msr.output();
+
+    // start radeontop reading thread
+    std::thread::spawn(|| {
+        loop {
+
+            let mut rdt = Command::new("radeontop");
+            rdt.args(["-l", "1", "-d", "-"]);
+            match rdt.output() {
+                Ok(res) => {
+                    _ = std::fs::write("./radeon", String::from_utf8(res.stdout).unwrap());
+                },
+                Err(_) => {
+                    _ = std::fs::write("./radeon", "err");
+                    break;
+                },
+            } 
+        }
+    });
+
+    // options
     let options = NativeOptions {
         always_on_top: true,
         maximized: false,
@@ -114,6 +135,7 @@ fn main() {
         shader_version: Some(egui_glow::ShaderVersion::Es300),
         centered: false,
     };
+    
     match run_native("hwi_rs", options, Box::new(|cc| Box::new(HwiRs::new(cc)))) {
         Ok(_) => {}
         Err(err) => {
