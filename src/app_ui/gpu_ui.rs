@@ -15,15 +15,16 @@ pub enum GpuVendor {
 pub fn gpu_ui(ui: &mut Ui) -> GpuVendor {
     let mut gpu_check = GpuVendor::None;
     ui.collapsing("GPU", |ui| {
-        if let Ok(_) = get_nvidia_ui(ui) {
-            gpu_check = GpuVendor::Nvidia;
-        } else if let Ok(_) = get_radeon_ui(ui) {
-            gpu_check = GpuVendor::Amd;
-        } else if let Ok(_) = get_intel_ui(ui) {
-            gpu_check = GpuVendor::Intel;
-        } else {
-            gpu_check = GpuVendor::None;
-        }
+        get_nvidia_ui(ui);
+        //if let Ok(_) = get_nvidia_ui(ui) {
+        //    gpu_check = GpuVendor::Nvidia;
+        //} else if let Ok(_) = get_radeon_ui(ui) {
+        //    gpu_check = GpuVendor::Amd;
+        //} else if let Ok(_) = get_intel_ui(ui) {
+        //    gpu_check = GpuVendor::Intel;
+        //} else {
+        //    gpu_check = GpuVendor::None;
+        //}
     })
     .header_response
     .ctx

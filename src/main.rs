@@ -81,7 +81,7 @@ impl App for HwiRs {
                             GpuVendor::Nvidia => {},
                             GpuVendor::Intel => {},
                             GpuVendor::Amd => {},
-                            GpuVendor::None => {ui.label("no gpu detected, please check if you have installed required tools for your gpu vendor \n (intel - intel-gpu-tools \nnvidia - propraietary driver\nradeon - radeon top");},
+                            GpuVendor::None => {},
                         };
                     });
             }
