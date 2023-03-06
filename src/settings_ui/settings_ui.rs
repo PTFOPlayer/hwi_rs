@@ -1,6 +1,6 @@
 use egui::Ui;
 use serde::{Deserialize, Serialize};
-use std::{ops::RangeInclusive, process::exit};
+use std::{ops::RangeInclusive, process::exit, env};
 use toml;
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -18,10 +18,23 @@ pub struct Config {
     pub keys: Keys,
 }
 
-static PATH: &str = "~/.config/hwi_rs/settings.toml";
+
+
+static PATH: &str = "/.config/hwi_rs/settings.toml";
+
+fn home_dir() -> String {
+    match env::var("HOME") {
+        Ok(res) => return res,
+        Err(_) => {
+            println!("error reading settings");
+            exit(-1)
+        },
+    };
+}
 
 pub fn get_settings() -> Config {
-    let file = std::fs::read_to_string(PATH);
+    
+    let file = std::fs::read_to_string(home_dir() + PATH);
     match file {
         Ok(res) => toml::from_str(res.as_str()).unwrap(),
         Err(_) => {
@@ -39,7 +52,7 @@ pub fn settings_ui(ui: &mut Ui) {
             let mut confing_to_write = current_settings.clone();
             confing_to_write.keys.mode = !current_settings.keys.mode;
             _ = std::fs::write(
-                PATH,
+                home_dir() + PATH,
                 toml::to_string(&confing_to_write).unwrap(),
             );
         };
@@ -50,7 +63,7 @@ pub fn settings_ui(ui: &mut Ui) {
                     let mut confing_to_write = current_settings.clone();
                     confing_to_write.keys.transparent = !current_settings.keys.transparent;
                     _ = std::fs::write(
-                        PATH,
+                        home_dir() + PATH,
                         toml::to_string(&confing_to_write).unwrap(),
                     );
                 }
@@ -59,7 +72,7 @@ pub fn settings_ui(ui: &mut Ui) {
                     let mut confing_to_write = current_settings.clone();
                     confing_to_write.keys.settings_always = !current_settings.keys.settings_always;
                     _ = std::fs::write(
-                        PATH,
+                        home_dir() + PATH,
                         toml::to_string(&confing_to_write).unwrap(),
                     );
                 }
@@ -74,7 +87,7 @@ pub fn settings_ui(ui: &mut Ui) {
                     let mut confing_to_write = current_settings.clone();
                     confing_to_write.keys.opacity = *value;
                     _ = std::fs::write(
-                        PATH,
+                        home_dir() + PATH,
                         toml::to_string(&confing_to_write).unwrap(),
                     );
                 }
@@ -87,14 +100,14 @@ pub fn settings_ui(ui: &mut Ui) {
                             Ok(res) => {
                                 confing_to_write.keys.overlay_x = res;
                                 _ = std::fs::write(
-                                    PATH,
+                                    home_dir() + PATH,
                                     toml::to_string(&confing_to_write).unwrap(),
                                 );
                             }
                             Err(_) => {
                                 confing_to_write.keys.overlay_x = 0.0;
                                 _ = std::fs::write(
-                                    PATH,
+                                    home_dir() + PATH,
                                     toml::to_string(&confing_to_write).unwrap(),
                                 );
                             }
@@ -110,14 +123,14 @@ pub fn settings_ui(ui: &mut Ui) {
                             Ok(res) => {
                                 confing_to_write.keys.overlay_y = res;
                                 _ = std::fs::write(
-                                    PATH,
+                                    home_dir() + PATH,
                                     toml::to_string(&confing_to_write).unwrap(),
                                 );
                             }
                             Err(_) => {
                                 confing_to_write.keys.overlay_y = 0.0;
                                 _ = std::fs::write(
-                                    PATH,
+                                    home_dir() + PATH,
                                     toml::to_string(&confing_to_write).unwrap(),
                                 );
                             }
