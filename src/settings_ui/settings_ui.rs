@@ -19,7 +19,7 @@ pub struct Config {
 }
 
 pub fn get_settings() -> Config {
-    let file = std::fs::read_to_string("./src/settings.toml");
+    let file = std::fs::read_to_string("~/.config/settings.toml");
     match file {
         Ok(res) => toml::from_str(res.as_str()).unwrap(),
         Err(_) => {
@@ -37,7 +37,7 @@ pub fn settings_ui(ui: &mut Ui) {
             let mut confing_to_write = current_settings.clone();
             confing_to_write.keys.mode = !current_settings.keys.mode;
             _ = std::fs::write(
-                "./src/settings.toml",
+                "~/.config/settings.toml",
                 toml::to_string(&confing_to_write).unwrap(),
             );
         };
@@ -48,7 +48,7 @@ pub fn settings_ui(ui: &mut Ui) {
                     let mut confing_to_write = current_settings.clone();
                     confing_to_write.keys.transparent = !current_settings.keys.transparent;
                     _ = std::fs::write(
-                        "./src/settings.toml",
+                        "~/.config/settings.toml",
                         toml::to_string(&confing_to_write).unwrap(),
                     );
                 }
@@ -57,7 +57,7 @@ pub fn settings_ui(ui: &mut Ui) {
                     let mut confing_to_write = current_settings.clone();
                     confing_to_write.keys.settings_always = !current_settings.keys.settings_always;
                     _ = std::fs::write(
-                        "./src/settings.toml",
+                        "~/.config/settings.toml",
                         toml::to_string(&confing_to_write).unwrap(),
                     );
                 }
@@ -72,7 +72,7 @@ pub fn settings_ui(ui: &mut Ui) {
                     let mut confing_to_write = current_settings.clone();
                     confing_to_write.keys.opacity = *value;
                     _ = std::fs::write(
-                        "./src/settings.toml",
+                        "~/.config/settings.toml",
                         toml::to_string(&confing_to_write).unwrap(),
                     );
                 }
@@ -85,14 +85,14 @@ pub fn settings_ui(ui: &mut Ui) {
                             Ok(res) => {
                                 confing_to_write.keys.overlay_x = res;
                                 _ = std::fs::write(
-                                    "./src/settings.toml",
+                                    "~/.config/settings.toml",
                                     toml::to_string(&confing_to_write).unwrap(),
                                 );
                             }
                             Err(_) => {
                                 confing_to_write.keys.overlay_x = 0.0;
                                 _ = std::fs::write(
-                                    "./src/settings.toml",
+                                    "~/.config/settings.toml",
                                     toml::to_string(&confing_to_write).unwrap(),
                                 );
                             }
@@ -108,14 +108,14 @@ pub fn settings_ui(ui: &mut Ui) {
                             Ok(res) => {
                                 confing_to_write.keys.overlay_y = res;
                                 _ = std::fs::write(
-                                    "./src/settings.toml",
+                                    "~/.config/settings.toml",
                                     toml::to_string(&confing_to_write).unwrap(),
                                 );
                             }
                             Err(_) => {
                                 confing_to_write.keys.overlay_y = 0.0;
                                 _ = std::fs::write(
-                                    "./src/settings.toml",
+                                    "~/.config/settings.toml",
                                     toml::to_string(&confing_to_write).unwrap(),
                                 );
                             }

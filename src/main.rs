@@ -77,12 +77,7 @@ impl App for HwiRs {
                     .always_show_scroll(true)
                     .show(ui, |ui| {
                         cpu_ui(ui);
-                        match gpu_ui(ui){
-                            GpuVendor::Nvidia => {},
-                            GpuVendor::Intel => {},
-                            GpuVendor::Amd => {},
-                            GpuVendor::None => {},
-                        };
+                        gpu_ui(ui);
                     });
             }
         });
