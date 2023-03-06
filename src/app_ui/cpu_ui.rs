@@ -27,6 +27,8 @@ pub fn cpu_ui(ui: &mut Ui) {
                     ui.label(format!("Temperature: {} °C", data.temperature));
                     ui.collapsing("advanced usage", |ui| {
                         ui.label(format!("Voltage: {}V", data.voltage));
+                        ui.label(format!("Curent: {}A", data.power / data.voltage));
+                        ui.label(format!("Power usage: {}W", data.power));
                     });
                     ui.collapsing("advanced spec", |ui| {
                         for cache in data.cache {
@@ -44,8 +46,6 @@ pub fn cpu_ui(ui: &mut Ui) {
                         }
                         if data.hyper_threading == 1 {
                             ui.label(format!("hyper threading: true"));
-                        } else if data.hyper_threading > 1 {
-                            ui.label(format!("advanced form of ht"));
                         } else {
                             ui.label(format!("hyper threading: false"));
                         }

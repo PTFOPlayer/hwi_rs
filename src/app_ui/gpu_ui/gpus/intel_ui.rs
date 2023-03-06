@@ -2,7 +2,7 @@ use egui::Ui;
 
 use crate::statistics::get_intel_gpu;
 
-pub fn get_intel_ui(ui: &mut Ui) {
+pub fn get_intel_ui(ui: &mut Ui) -> Result<(), ()> {
     match get_intel_gpu() {
         Ok(data) => {
             ui.label(format!("imc read: {}", data.imc_rd));
@@ -20,7 +20,10 @@ pub fn get_intel_ui(ui: &mut Ui) {
                 ui.label("vcs -> vector command streamer");
                 ui.label("vecs -> video enhancement engine command streamer");
             });
+            return Ok(());
         }
-        Err(_) => todo!(),
+        Err(_) => {
+            return Err(());
+        }
     };
 }

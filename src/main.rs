@@ -77,7 +77,12 @@ impl App for HwiRs {
                     .always_show_scroll(true)
                     .show(ui, |ui| {
                         cpu_ui(ui);
-                        gpu_ui(ui);
+                        match gpu_ui(ui){
+                            GpuVendor::Nvidia => {},
+                            GpuVendor::Intel => {},
+                            GpuVendor::Amd => {},
+                            GpuVendor::None => {ui.label("no gpu detected, please check if you have installed required tools for your gpu vendor \n (intel - intel-gpu-tools \nnvidia - propraietary driver\nradeon - radeon top");},
+                        };
                     });
             }
         });
@@ -90,20 +95,17 @@ fn main() {
     _ = msr.output();
 
     // start radeontop reading thread
-    std::thread::spawn(|| {
-        loop {
-
-            let mut rdt = Command::new("radeontop");
-            rdt.args(["-l", "1", "-d", "-"]);
-            match rdt.output() {
-                Ok(res) => {
-                    _ = std::fs::write("./radeon", String::from_utf8(res.stdout).unwrap());
-                },
-                Err(_) => {
-                    _ = std::fs::write("./radeon", "err");
-                    break;
-                },
-            } 
+    std::thread::spawn(|| loop {
+        let mut rdt = Command::new("radeontop");
+        rdt.args(["-l", "1", "-d", "-"]);
+        match rdt.output() {
+            Ok(res) => {
+                _ = std::fs::write("./radeon", String::from_utf8(res.stdout).unwrap());
+            }
+            Err(_) => {
+                _ = std::fs::write("./radeon", "err");
+                break;
+            }
         }
     });
 
@@ -135,7 +137,7 @@ fn main() {
         shader_version: Some(egui_glow::ShaderVersion::Es300),
         centered: false,
     };
-    
+
     match run_native("hwi_rs", options, Box::new(|cc| Box::new(HwiRs::new(cc)))) {
         Ok(_) => {}
         Err(err) => {
