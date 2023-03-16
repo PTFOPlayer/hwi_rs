@@ -4,7 +4,7 @@ pub struct RadeonStats {
     pub mem_percent: String,
     pub bus: String,
     pub mem_clock: String,
-    pub core_clock: String
+    pub core_clock: String,
 }
 
 pub fn get_radeon() -> Result<RadeonStats, ()> {
@@ -16,16 +16,18 @@ pub fn get_radeon() -> Result<RadeonStats, ()> {
             }
 
             let lines = res.lines().collect::<Vec<&str>>();
-            if lines.len() < 2 {return Err(());}
+            if lines.len() < 2 {
+                return Err(());
+            }
 
             let data_line = lines[1];
-            let segments = data_line.split([' ',',']).collect::<Vec<&str>>();
+            let segments = data_line.split([' ', ',']).collect::<Vec<&str>>();
 
             println!("{:?}", segments);
 
             let bus = segments[2].to_owned();
             let usage = segments[5].to_owned();
-            
+
             let current_mem = segments[27].to_owned();
             let mem_percent = segments[26].to_owned();
 
@@ -39,7 +41,7 @@ pub fn get_radeon() -> Result<RadeonStats, ()> {
                 bus,
                 mem_clock,
                 core_clock,
-            });                
+            });
         }
         Err(_) => return Err(()),
     }

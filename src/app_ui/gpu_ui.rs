@@ -10,20 +10,25 @@ pub fn gpu_ui(ui: &mut Ui) {
         // allows handling of ui results
         // currently not used
         match get_nvidia_ui(ui) {
-            Some(_) => {return;},
-            None => {},
+            Some(_) => {
+                return;
+            }
+            None => {}
         };
         match get_radeon_ui(ui) {
-            Some(_) => {return;},
-            None => {},
+            Some(_) => {
+                return;
+            }
+            None => {}
         }
         match get_intel_ui(ui) {
-            Some(_) => {return;},
-            None => {},
+            Some(_) => {
+                return;
+            }
+            None => {}
         }
     })
     .header_response
     .ctx
     .request_repaint_after(Duration::from_secs_f32(0.2));
-
 }

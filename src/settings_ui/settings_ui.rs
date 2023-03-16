@@ -1,6 +1,6 @@
 use egui::Ui;
 use serde::{Deserialize, Serialize};
-use std::{ops::RangeInclusive, process::exit, env};
+use std::{env, ops::RangeInclusive, process::exit};
 use toml;
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -18,8 +18,6 @@ pub struct Config {
     pub keys: Keys,
 }
 
-
-
 static PATH: &str = "/.config/hwi_rs/settings.toml";
 
 fn home_dir() -> String {
@@ -28,12 +26,11 @@ fn home_dir() -> String {
         Err(_) => {
             println!("error reading settings");
             exit(-1)
-        },
+        }
     };
 }
 
 pub fn get_settings() -> Config {
-    
     let file = std::fs::read_to_string(home_dir() + PATH);
     match file {
         Ok(res) => toml::from_str(res.as_str()).unwrap(),
