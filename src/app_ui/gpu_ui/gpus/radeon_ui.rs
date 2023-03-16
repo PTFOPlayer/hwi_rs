@@ -2,11 +2,13 @@ use egui::Ui;
 
 use crate::statistics::get_radeon;
 
-pub fn get_radeon_ui(ui: &mut Ui) -> Result<(), ()> {
+pub fn get_radeon_ui(ui: &mut Ui) -> Option<()> {
     match get_radeon() {
         Ok(res) => {
-            return Ok(());
+            
+
+            return Some(());
         },
-        Err(_) => return Err(()),
+        Err(_) => return None,
     }
 }

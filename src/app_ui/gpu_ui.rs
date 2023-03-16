@@ -10,16 +10,16 @@ pub fn gpu_ui(ui: &mut Ui) {
         // allows handling of ui results
         // currently not used
         match get_nvidia_ui(ui) {
-            Ok(_) => {},
-            Err(_) => {},
+            Some(_) => {return;},
+            None => {},
         };
         match get_radeon_ui(ui) {
-            Ok(_) => {},
-            Err(_) => {},
+            Some(_) => {return;},
+            None => {},
         }
         match get_intel_ui(ui) {
-            Ok(_) => {},
-            Err(_) => {},
+            Some(_) => {return;},
+            None => {},
         }
     })
     .header_response

@@ -2,7 +2,7 @@ use egui::Ui;
 
 use crate::statistics::get_nv;
 
-pub fn get_nvidia_ui(ui: &mut Ui) -> Result<(), ()> {
+pub fn get_nvidia_ui(ui: &mut Ui) -> Option<()> {
     match get_nv() {
         Ok(data) => {
             let (spec, util) = (data.spec, data.util);
@@ -44,10 +44,10 @@ pub fn get_nvidia_ui(ui: &mut Ui) -> Result<(), ()> {
                 ui.label(format!("pci_e gen: {:?}", spec.pci_e_gen));
                 ui.label(format!("pci_e width: {:?}", spec.pci_e_width));
             });
-            return Ok(());
+            return Some(());
         }
         Err(_) => {
-            return Err(());
+            return None;
         }
     };
 }
