@@ -45,5 +45,4 @@ pub fn get_radeon() -> Result<RadeonStats, ()> {
         }
         Err(_) => return Err(()),
     }
-    Err(())
 }
