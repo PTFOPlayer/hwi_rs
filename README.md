@@ -8,19 +8,23 @@
 ## hwi_rs is a program displays CPU and GPU data to user in compact and understandable way. 
 
 # instalation
-to install you don't need any dependencies besides:
-  * nodejs
-  * npm
+to install basic version you don't need any dependencies just do all the steps.
 
 first clone repository
 ```
-    git clone https://github.com/PTFOPlayer/hwi_rs && cdc hwi_rs
+    git clone https://github.com/PTFOPlayer/hwi_rs && cd hwi_rs
 ```
 
 then run instalation script
 ```
     ./install.sh
 ```
+
+you can also run `./install.sh -s` to install additional dependencies that allow you to make requests via api, you will need to install:
+  * nodejs
+  * npm
+
+usage of api will be explained in msr_server ( currently is not )
 
 # build from source
 to build from source you need several packages:
