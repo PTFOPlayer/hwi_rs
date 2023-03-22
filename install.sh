@@ -1,14 +1,5 @@
-VARDIR= ls /var/ | grep 'msr_server'
-if !(grep -q "$VARDIR" <<< msr_server)
-then
-    sudo mkdir /var/msr_server
-fi
-
-CONFDIR= ls ~/.config | grep 'hwi_rs'
-if !(grep -q "$CONFDIR" <<< "hwi_rs");
-then
-    mkdir ~/.config/hwi_rs
-fi
+sudo mkdir /var/msr_server
+mkdir ~/.config/hwi_rs
 
 if (sudo cp ./instalation_files/msr_server.service /etc/systemd/system/) && (sudo cp ./instalation_files/msr_rest_server.service /etc/systemd/system/) && (sudo cp ./instalation_files/msr_gen /usr/bin/) && (cp ./instalation_files/settings.toml ~/.config/hwi_rs/) && (sudo cp ./instalation_files/hwi_rs /usr/bin)
 then

@@ -91,19 +91,19 @@ fn main() {
     _ = msr.output();
 
     // start radeontop reading thread
-    // std::thread::spawn(|| loop {
-    //     let mut rdt = Command::new("radeontop");
-    //     rdt.args(["-l", "1", "-d", "-"]);
-    //     match rdt.output() {
-    //         Ok(res) => {
-    //             _ = std::fs::write("./radeon", String::from_utf8(res.stdout).unwrap());
-    //         }
-    //         Err(_) => {
-    //             _ = std::fs::write("./radeon", "err");
-    //             break;
-    //         }
-    //     }
-    // });
+    std::thread::spawn(|| loop {
+        let mut rdt = Command::new("radeontop");
+        rdt.args(["-l", "1", "-d", "-"]);
+        match rdt.output() {
+            Ok(res) => {
+                _ = std::fs::write("./radeon", String::from_utf8(res.stdout).unwrap());
+            }
+            Err(_) => {
+                _ = std::fs::write("./radeon", "err");
+                break;
+            }
+        }
+    });
 
     // options
     let options = NativeOptions {

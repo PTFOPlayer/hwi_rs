@@ -23,7 +23,7 @@ pub fn get_radeon() -> Result<RadeonStats, ()> {
             let data_line = lines[1];
             let segments = data_line.split([' ', ',']).collect::<Vec<&str>>();
 
-            println!("{:?}", segments);
+            //println!("{:?}", segments);
 
             let bus = segments[2].to_owned();
             let usage = segments[5].to_owned();
