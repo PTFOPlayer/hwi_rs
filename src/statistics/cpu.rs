@@ -15,6 +15,13 @@ pub struct CpuData {
 }
 
 #[derive(Deserialize, Serialize, Clone)]
+pub struct MemMsr {
+    pub total: i32,
+    pub available: i32,
+    pub used: i32
+}
+
+#[derive(Deserialize, Serialize, Clone)]
 pub struct CpuMsr {
     pub vendor: String,
     pub name: String,
@@ -30,6 +37,7 @@ pub struct CpuMsr {
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Msr {
     pub cpu: CpuMsr,
+    pub memory: MemMsr
 }
 
 pub fn get_cpu() -> Result<CpuData, String> {
@@ -90,4 +98,18 @@ pub fn get_cpu() -> Result<CpuData, String> {
         cache,
         hyper_threading,
     });
+}
+
+pub fn get_mem() -> Result<MemMsr, String> {
+    let msr: Msr = {
+        match std::fs::read_to_string("/msr_data.toml") {
+            Ok(res) => match toml::from_str(res.as_str()) {
+                Ok(res) => res,
+                Err(_) => return Err("error decoding MSR data file".to_owned()),
+            },
+            Err(_) => return Err("error reading MSR data file".to_owned()),
+        }
+    };
+
+    return Ok(msr.memory)
 }

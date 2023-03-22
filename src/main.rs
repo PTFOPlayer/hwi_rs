@@ -77,6 +77,7 @@ impl App for HwiRs {
                     .always_show_scroll(true)
                     .show(ui, |ui| {
                         cpu_ui(ui);
+                        mem_ui(ui);
                         gpu_ui(ui);
                     });
             }
