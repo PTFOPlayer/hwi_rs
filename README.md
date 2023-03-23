@@ -7,6 +7,11 @@
 
 ## hwi_rs is a program displays CPU and GPU data to user in compact and understandable way. 
 
+# gpu support
+  * nvidia gpu require: nvidia-smi (proprietary driver)
+  * amd gpu require: radeontop
+  * intel gpu require: intel-gpu-tools
+
 # instalation
 to install basic version you don't need any dependencies just do all the steps.
 

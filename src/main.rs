@@ -68,6 +68,7 @@ impl App for HwiRs {
                 frame.set_decorations(false);
                 frame.set_window_size(Vec2 { x: 250., y: 90. });
                 frame.set_always_on_top(true);
+                frame.set_fullscreen(false);
                 overlay_ui(ui);
             } else {
                 settings_ui(ui);

@@ -23,12 +23,10 @@ pub fn get_radeon() -> Result<RadeonStats, ()> {
             let data_line = lines[1];
             let segments = data_line.split([' ', ',']).collect::<Vec<&str>>();
 
-            //println!("{:?}", segments);
-
             let bus = segments[2].to_owned();
             let usage = segments[5].to_owned();
 
-            let current_mem = segments[27].to_owned();
+            let current_mem = segments[28].to_owned();
             let mem_percent = segments[26].to_owned();
 
             let mem_clock = segments[47].to_owned();
