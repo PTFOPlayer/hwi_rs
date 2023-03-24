@@ -4,21 +4,27 @@
 mod statistics;
 use std::process::Command;
 
-// keeping this for teamplate
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-//#[tauri::command]
-//fn greet(name: &str) -> String {
-//    format!("Hello, {}! You've been greeted from Rust!", name)
-//}
+use statistics::{get_cpu, CpuData};
+use tauri::generate_context;
+
+#[tauri::command]
+fn tauri_get_cpu() -> String {
+    match get_cpu() {
+        Ok(res) =>  format!("{}", res.power),
+        Err(err) => format!("error") 
+    }
+}
 
 fn main() {
     let mut msr = Command::new("systemctl");
     msr.arg("start").arg("msr_server.service");
     _ = msr.output();
 
-    // keeping this for teamplate
-    // tauri::Builder::default()
-    //     .invoke_handler(tauri::generate_handler![greet])
-    //     .run(tauri::generate_context!())
-    //     .expect("error while running tauri application");
+    //keeping this for teamplate
+    tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![tauri_get_cpu])
+        .run(generate_context!())
+        .expect("error while running tauri application");
+
+    ()
 }
