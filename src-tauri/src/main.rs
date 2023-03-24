@@ -8,10 +8,10 @@ use statistics::{get_cpu, CpuData};
 use tauri::generate_context;
 
 #[tauri::command]
-fn tauri_get_cpu() -> String {
+fn tauri_get_cpu() -> Result<CpuData, ()> {
     match get_cpu() {
-        Ok(res) =>  format!("{}", res.power),
-        Err(err) => format!("error") 
+        Ok(res) =>  Ok(res),
+        Err(_) => Err(())
     }
 }
 

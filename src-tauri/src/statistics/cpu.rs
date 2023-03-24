@@ -1,6 +1,17 @@
-use raw_cpuid::{self, CacheParametersIter};
+use raw_cpuid;
 use serde::{Deserialize, Serialize};
 use std::fs;
+
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct CacheData {
+    pub size: i64,
+    pub level: u8,
+    pub cache_type: String
+}
+
+
+#[derive(Deserialize, Serialize, Clone)]
 pub struct CpuData {
     pub name: String,
     pub logical_cores: i32,
@@ -10,7 +21,7 @@ pub struct CpuData {
     pub frequency: Vec<String>,
     pub load: f32,
     pub temperature: i32,
-    pub cache: CacheParametersIter,
+    pub cache: Vec<CacheData>,
     pub hyper_threading: i32,
 }
 
@@ -67,6 +78,24 @@ pub fn get_cpu() -> Result<CpuData, String> {
         None => return Err("CPU err".to_owned()),
     };
 
+    let mut cache_vec = vec![]; 
+    for c in cache {
+        let size = c.associativity()
+            * c.physical_line_partitions()
+            * c.coherency_line_size()
+            * c.sets() ;
+        let size = size as i64;
+        let level = c.level();
+        let cache_type = c.cache_type().to_string();
+
+        cache_vec.push(CacheData {
+            size,
+            level,
+            cache_type,
+        });
+
+    }
+
     let msr: Msr = {
         match std::fs::read_to_string("/msr_data.toml") {
             Ok(res) => match toml::from_str(res.as_str()) {
@@ -86,6 +115,8 @@ pub fn get_cpu() -> Result<CpuData, String> {
     let hyper_threading = msr.cpu.hyper_threading;
     let power = msr.cpu.power;
 
+
+
     return Ok(CpuData {
         name,
         logical_cores,
@@ -95,7 +126,7 @@ pub fn get_cpu() -> Result<CpuData, String> {
         power,
         load,
         temperature,
-        cache,
+        cache: cache_vec,
         hyper_threading,
     });
 }
