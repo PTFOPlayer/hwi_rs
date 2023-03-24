@@ -49,3 +49,6 @@ then run build
 ```
     ./build.sh
 ```
+
+# NOTE:
+### CURRENTLY I'M REWRITING UI ON OTHER BRANCH
