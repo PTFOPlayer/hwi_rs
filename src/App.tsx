@@ -37,7 +37,10 @@ function App() {
 
   return (
     <div className="container">
-      <h1> {cpu?.power} </h1>
+      <h1> Usage: {cpu?.load} </h1>
+      <h1> Power: {cpu?.power} </h1>
+      <h1> Voltage: {cpu?.voltage} </h1>
+      <h1> Frequency: {cpu?.frequency.toString()} </h1>
     </div>
   );
 }

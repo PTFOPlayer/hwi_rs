@@ -1,3 +1,6 @@
+use serde::{Serialize, Deserialize};
+
+#[derive(Deserialize, Serialize, Clone)]
 pub struct RadeonStats {
     pub usage: String,
     pub current_mem: String,

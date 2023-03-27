@@ -4,14 +4,46 @@
 mod statistics;
 use std::process::Command;
 
-use statistics::{get_cpu, CpuData};
-use tauri::generate_context;
+use statistics::*;
+use tauri::{generate_context, generate_handler};
 
 #[tauri::command]
 fn tauri_get_cpu() -> Result<CpuData, ()> {
     match get_cpu() {
-        Ok(res) =>  Ok(res),
-        Err(_) => Err(())
+        Ok(res) => Ok(res),
+        Err(_) => Err(()),
+    }
+}
+
+#[tauri::command]
+fn tauri_get_memory() -> Result<MemData, ()> {
+    match get_mem() {
+        Ok(res) => Ok(res),
+        Err(_) => Err(()),
+    }
+}
+
+#[tauri::command]
+fn tauri_get_nv() -> Result<NvStats, ()> {
+    match get_nv() {
+        Ok(res) => Ok(res),
+        Err(_) => Err(()),
+    }
+}
+
+#[tauri::command]
+fn tauri_get_radeon() -> Result<RadeonStats, ()> {
+    match get_radeon() {
+        Ok(res) => Ok(res),
+        Err(_) => Err(()),
+    }
+}
+
+#[tauri::command]
+fn tauri_get_intel_gpu() -> Result<IgStats, ()> {
+    match get_intel_gpu() {
+        Ok(res) => Ok(res),
+        Err(_) => Err(()),
     }
 }
 
@@ -22,7 +54,13 @@ fn main() {
 
     //keeping this for teamplate
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![tauri_get_cpu])
+        .invoke_handler(generate_handler![
+            tauri_get_cpu,
+            tauri_get_memory,
+            tauri_get_nv,
+            tauri_get_radeon,
+            tauri_get_intel_gpu
+        ])
         .run(generate_context!())
         .expect("error while running tauri application");
 

@@ -1,6 +1,9 @@
 use std::process::Command;
 
-pub struct IgData {
+use serde::{Serialize, Deserialize};
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct IgStats {
     pub freqency: String,
     pub power: String,
     pub imc_rd: String,
@@ -12,7 +15,7 @@ pub struct IgData {
 }
 
 // sudo intel_gpu_top -o - | awk '{print>"current";close("current")}'
-pub fn get_intel_gpu() -> Result<IgData, ()> {
+pub fn get_intel_gpu() -> Result<IgStats, ()> {
     let mut getter = Command::new("cat");
     getter.arg("./current");
     let s = match getter.output() {
@@ -34,7 +37,7 @@ pub fn get_intel_gpu() -> Result<IgData, ()> {
     let bcs_usg = splitted[11].to_owned();
     let vcs_usg = splitted[14].to_owned();
     let vecs_usg = splitted[17].to_owned();
-    Ok(IgData {
+    Ok(IgStats {
         freqency,
         power,
         imc_rd,

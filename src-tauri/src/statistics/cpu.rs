@@ -2,14 +2,12 @@ use raw_cpuid;
 use serde::{Deserialize, Serialize};
 use std::fs;
 
-
 #[derive(Deserialize, Serialize, Clone)]
 pub struct CacheData {
     pub size: i64,
     pub level: u8,
-    pub cache_type: String
+    pub cache_type: String,
 }
-
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct CpuData {
@@ -18,7 +16,7 @@ pub struct CpuData {
     pub physical_cores: i32,
     pub power: f32,
     pub voltage: f32,
-    pub frequency: Vec<String>,
+    pub frequency: Vec<f32>,
     pub load: f32,
     pub temperature: i32,
     pub cache: Vec<CacheData>,
@@ -29,7 +27,14 @@ pub struct CpuData {
 pub struct MemMsr {
     pub total: i32,
     pub available: i32,
-    pub used: i32
+    pub used: i32,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct MemData {
+    pub total: i32,
+    pub available: i32,
+    pub used: i32,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -48,7 +53,7 @@ pub struct CpuMsr {
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Msr {
     pub cpu: CpuMsr,
-    pub memory: MemMsr
+    pub memory: MemMsr,
 }
 
 pub fn get_cpu() -> Result<CpuData, String> {
@@ -63,7 +68,10 @@ pub fn get_cpu() -> Result<CpuData, String> {
                 let s_local = splitted.clone();
                 for i in 0..s_local.len() {
                     if s_local[i].contains("MHz") {
-                        freq.append(&mut vec![s_local[i + 2][2..].to_owned()]);
+                        match s_local[i + 2][2..].to_owned().parse::<f32>() {
+                            Ok(res) => freq.push(res),
+                            Err(_) => {}
+                        };
                     }
                 }
                 freq
@@ -78,12 +86,10 @@ pub fn get_cpu() -> Result<CpuData, String> {
         None => return Err("CPU err".to_owned()),
     };
 
-    let mut cache_vec = vec![]; 
+    let mut cache_vec = vec![];
     for c in cache {
-        let size = c.associativity()
-            * c.physical_line_partitions()
-            * c.coherency_line_size()
-            * c.sets() ;
+        let size =
+            c.associativity() * c.physical_line_partitions() * c.coherency_line_size() * c.sets();
         let size = size as i64;
         let level = c.level();
         let cache_type = c.cache_type().to_string();
@@ -93,7 +99,6 @@ pub fn get_cpu() -> Result<CpuData, String> {
             level,
             cache_type,
         });
-
     }
 
     let msr: Msr = {
@@ -115,8 +120,6 @@ pub fn get_cpu() -> Result<CpuData, String> {
     let hyper_threading = msr.cpu.hyper_threading;
     let power = msr.cpu.power;
 
-
-
     return Ok(CpuData {
         name,
         logical_cores,
@@ -131,7 +134,7 @@ pub fn get_cpu() -> Result<CpuData, String> {
     });
 }
 
-pub fn get_mem() -> Result<MemMsr, String> {
+pub fn get_mem() -> Result<MemData, String> {
     let msr: Msr = {
         match std::fs::read_to_string("/msr_data.toml") {
             Ok(res) => match toml::from_str(res.as_str()) {
@@ -142,5 +145,9 @@ pub fn get_mem() -> Result<MemMsr, String> {
         }
     };
 
-    return Ok(msr.memory)
+    return Ok(MemData {
+        total: msr.memory.total,
+        available: msr.memory.available,
+        used: msr.memory.used,
+    });
 }
