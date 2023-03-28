@@ -1,5 +1,8 @@
 sudo mkdir /var/msr_server
+sudo mkdir /var/hwi_rs
+sudo touch /var/hwi_rs/radeon
 mkdir ~/.config/hwi_rs
+
 
 if [ "$1" = "-s" ];
 then 

@@ -8,7 +8,7 @@ pub struct RadeonStats {
 }
 
 pub fn get_radeon() -> Result<RadeonStats, ()> {
-    let file = std::fs::read_to_string("./radeon");
+    let file = std::fs::read_to_string("/var/hwi_rs/radeon");
     match file {
         Ok(res) => {
             if res.contains("err") {

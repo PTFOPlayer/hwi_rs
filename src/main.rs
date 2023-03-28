@@ -97,10 +97,10 @@ fn main() {
         rdt.args(["-l", "1", "-d", "-"]);
         match rdt.output() {
             Ok(res) => {
-                _ = std::fs::write("./radeon", String::from_utf8(res.stdout).unwrap());
+                _ = std::fs::write("/var/hwi_rs/radeon", String::from_utf8(res.stdout).unwrap());
             }
             Err(_) => {
-                _ = std::fs::write("./radeon", "err");
+                _ = std::fs::write("/var/hwi_rs/radeon", "err");
                 break;
             }
         }
