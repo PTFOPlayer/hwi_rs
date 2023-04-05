@@ -36,7 +36,8 @@
         "resizable": true,
         "title": "hwi_rs_ui2",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "transparent": true
       }
     ]
   }
