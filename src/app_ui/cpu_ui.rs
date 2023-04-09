@@ -44,11 +44,6 @@ pub fn cpu_ui(ui: &mut Ui) {
                                 size / 1024
                             ));
                         }
-                        if data.hyper_threading == 1 {
-                            ui.label(format!("hyper threading: true"));
-                        } else {
-                            ui.label(format!("hyper threading: false"));
-                        }
                     });
                 }
                 Err(err) => {
