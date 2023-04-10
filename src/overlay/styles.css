@@ -3,8 +3,8 @@
   font-weight: 400;
 
   color: #0f0f0f;
-  background-color: #f6f6f6;
-
+  background-color: #f6f6f69F;
+  
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -16,7 +16,7 @@
   :root {
     color: #E1D8DB;
     background: transparent;
-    background-color: #1A1D22;
+    background-color: #1A1D229F;
     
   }
 

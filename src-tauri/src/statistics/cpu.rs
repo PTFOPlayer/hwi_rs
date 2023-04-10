@@ -20,7 +20,6 @@ pub struct CpuData {
     pub load: f32,
     pub temperature: i32,
     pub cache: Vec<CacheData>,
-    pub hyper_threading: i32,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -43,9 +42,9 @@ pub struct CpuMsr {
     pub name: String,
     pub power: f32,
     pub voltage: f32,
+    pub temperature: f32,
+    pub frequency: i64,
     pub usage: f32,
-    pub temperature: i32,
-    pub hyper_threading: i32,
     pub logical_cores: i32,
     pub physical_cores: i32,
 }
@@ -117,7 +116,7 @@ pub fn get_cpu() -> Result<CpuData, String> {
     let logical_cores = msr.cpu.logical_cores;
     let physical_cores = msr.cpu.physical_cores;
     let voltage = msr.cpu.voltage;
-    let hyper_threading = msr.cpu.hyper_threading;
+    
     let power = msr.cpu.power;
 
     return Ok(CpuData {
@@ -128,9 +127,8 @@ pub fn get_cpu() -> Result<CpuData, String> {
         voltage,
         power,
         load,
-        temperature,
+        temperature: temperature as i32,
         cache: cache_vec,
-        hyper_threading,
     });
 }
 

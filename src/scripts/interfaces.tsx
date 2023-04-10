@@ -14,7 +14,6 @@ export interface CpuData {
   load: number,
   temperature: number,
   cache: Array<CacheData>,
-  hyper_threading: number,
 }
 
 export interface NvStats {

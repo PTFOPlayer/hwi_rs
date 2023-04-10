@@ -11,7 +11,10 @@ use tauri::{generate_context, generate_handler};
 fn tauri_get_cpu() -> Result<CpuData, ()> {
     match get_cpu() {
         Ok(res) => Ok(res),
-        Err(_) => Err(()),
+        Err(err) => {
+            println!("{:?}", err);   
+            Err(())
+        },
     }
 }
 
@@ -19,7 +22,10 @@ fn tauri_get_cpu() -> Result<CpuData, ()> {
 fn tauri_get_memory() -> Result<MemData, ()> {
     match get_mem() {
         Ok(res) => Ok(res),
-        Err(_) => Err(()),
+        Err(err) => {
+            println!("{:?}", err);   
+            Err(())
+        },
     }
 }
 
@@ -27,7 +33,10 @@ fn tauri_get_memory() -> Result<MemData, ()> {
 fn tauri_get_nv() -> Result<NvStats, ()> {
     match get_nv() {
         Ok(res) => Ok(res),
-        Err(_) => Err(()),
+        Err(err) => {
+            println!("{:?}", err);   
+            Err(())
+        },
     }
 }
 
@@ -35,7 +44,10 @@ fn tauri_get_nv() -> Result<NvStats, ()> {
 fn tauri_get_radeon() -> Result<RadeonStats, ()> {
     match get_radeon() {
         Ok(res) => Ok(res),
-        Err(_) => Err(()),
+        Err(err) => {
+            println!("{:?}", err);   
+            Err(())
+        },
     }
 }
 
@@ -43,8 +55,24 @@ fn tauri_get_radeon() -> Result<RadeonStats, ()> {
 fn tauri_get_intel_gpu() -> Result<IgStats, ()> {
     match get_intel_gpu() {
         Ok(res) => Ok(res),
-        Err(_) => Err(()),
+        Err(err) => {
+            println!("{:?}", err);   
+            Err(())
+        },
     }
+}
+
+
+#[tauri::command]
+fn second_window(handle: tauri::AppHandle) -> Result<(), String> {
+    let _w = tauri::WindowBuilder::new(&handle, "sec", tauri::WindowUrl::App("index_ol.html".into()))
+        .always_on_top(true)
+        .decorations(false)
+        .position(0.0, 0.0)
+        .transparent(true)
+        .inner_size(260.0, 180.0)
+        .build().unwrap();
+    Ok(())
 }
 
 fn main() {
@@ -59,7 +87,8 @@ fn main() {
             tauri_get_memory,
             tauri_get_nv,
             tauri_get_radeon,
-            tauri_get_intel_gpu
+            tauri_get_intel_gpu,
+            second_window,
         ])
         .run(generate_context!())
         .expect("error while running tauri application");

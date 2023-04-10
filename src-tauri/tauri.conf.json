@@ -32,6 +32,7 @@
     },
     "windows": [
       {
+        "label": "main",
         "fullscreen": false,
         "resizable": true,
         "title": "hwi_rs_ui2",

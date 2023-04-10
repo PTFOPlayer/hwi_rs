@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import { invoke } from '@tauri-apps/api/tauri'
-import { CpuData, NvSpec, NvStats } from './scripts/interfaces'
-import Cpu from "./components/Cpu/Cpu";
-import Nvidia from "./components/Nvidia/Nvidia";
+import { CpuData, NvSpec, NvStats } from '../scripts/interfaces'
 
 function App() {
   const [nvidia, setNvidia] = useState<NvStats | null>(null)
@@ -32,9 +30,8 @@ function App() {
 
   return (
     <div>
-      <button onClick={handle_click}>new_window</button>
-      {cpu ? <Cpu cpu={cpu}/> : null}
-      {nvidia ? <Nvidia nvidia={nvidia}/> : null}
+      Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quidem dolorem temporibus sint dolorum similique velit accusamus possimus saepe labore quibusdam neque expedita ducimus, explicabo, magni voluptatibus necessitatibus, ullam iure accusantium.
+      
      </div>
   );
 }
