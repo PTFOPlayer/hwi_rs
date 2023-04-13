@@ -62,19 +62,6 @@ fn tauri_get_intel_gpu() -> Result<IgStats, ()> {
     }
 }
 
-
-#[tauri::command]
-fn second_window(handle: tauri::AppHandle) -> Result<(), String> {
-    let _w = tauri::WindowBuilder::new(&handle, "sec", tauri::WindowUrl::App("index_ol.html".into()))
-        .always_on_top(true)
-        .decorations(false)
-        .position(0.0, 0.0)
-        .transparent(true)
-        .inner_size(260.0, 180.0)
-        .build().unwrap();
-    Ok(())
-}
-
 fn main() {
     let mut msr = Command::new("systemctl");
     msr.arg("start").arg("msr_server.service");
