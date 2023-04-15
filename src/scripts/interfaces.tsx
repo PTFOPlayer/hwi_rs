@@ -16,6 +16,12 @@ export interface CpuData {
   cache: Array<CacheData>,
 }
 
+export interface MemData {
+  total: number,
+  available: number,
+  used: number
+}
+
 export interface NvStats {
   spec: NvSpec,
   util: NvUtil,

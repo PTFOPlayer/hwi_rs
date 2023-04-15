@@ -5,7 +5,7 @@ export default function Nvidia(nvData:{nvidia: NvStats}) {
     let NvUtil = nvData.nvidia.util;
     return (
         <div className="cpu">
-          <h1> GPU: {NvSpec.name} </h1>
+          <h1> {NvSpec.name} </h1>
           <div className="data">
             <div>
               <h3> General </h3>

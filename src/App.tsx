@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import "./App.css";
 import { invoke } from '@tauri-apps/api/tauri'
-import { CpuData, NvSpec, NvStats } from './scripts/interfaces'
+import { CpuData, MemData, NvStats } from './scripts/interfaces'
 import Cpu from "./components/Cpu/Cpu";
 import Nvidia from "./components/Nvidia/Nvidia";
 
 function App() {
   const [nvidia, setNvidia] = useState<NvStats | null>(null)
   const [cpu, setCpu] = useState<CpuData | null>(null)
+  const [memory, setMemory] = useState<MemData | null>(null)
   
   async function setters() {
     await invoke("tauri_get_nv")
@@ -16,7 +16,9 @@ function App() {
     await invoke("tauri_get_cpu")
       .then(res => setCpu(res as CpuData))
       .catch(() => setCpu(null));
-
+    await invoke("tauri_get_memory")
+      .then(res => setMemory(res as MemData))
+      .catch(() => setMemory(null));
   }
 
   useEffect(() => {
@@ -26,14 +28,9 @@ function App() {
     }
   }, [])
 
-  let handle_click = async () => {
-    await invoke("second_window")
-  }
-
   return (
     <div>
-      <button onClick={handle_click}>new_window</button>
-      {cpu ? <Cpu cpu={cpu}/> : null}
+      {cpu && memory ? <Cpu cpu={cpu} memory={memory}/> : null}
       {nvidia ? <Nvidia nvidia={nvidia}/> : null}
      </div>
   );

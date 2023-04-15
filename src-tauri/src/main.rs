@@ -74,8 +74,7 @@ fn main() {
             tauri_get_memory,
             tauri_get_nv,
             tauri_get_radeon,
-            tauri_get_intel_gpu,
-            second_window,
+            tauri_get_intel_gpu
         ])
         .run(generate_context!())
         .expect("error while running tauri application");

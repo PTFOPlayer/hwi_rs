@@ -25,3 +25,6 @@ dist-ssr
 *.sw?
 
 dev-build.sh
+msr_server
+
+install_deps/hwi-rs-ui2*
