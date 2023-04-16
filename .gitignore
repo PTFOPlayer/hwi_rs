@@ -28,3 +28,4 @@ dev-build.sh
 msr_server
 
 install_deps/hwi-rs-ui2*
+install_deps/hwi_rs
