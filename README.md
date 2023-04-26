@@ -1,7 +1,8 @@
-# Tauri + React + Typescript
+<h1 align="center"> hwi_rs </h1>
+<p>
+  <a href="#" target="_blank">
+    <img alt="License: GNU GPL 3.0" src="https://img.shields.io/badge/License-GNU GPL 3.0-yellow.svg" />
+  </a>
+</p>
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
-
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## hwi_rs is a program displays CPU and GPU data to user in compact and understandable way. 
