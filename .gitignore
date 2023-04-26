@@ -1,6 +1,31 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-.vscode
+node_modules
+dist
+dist-ssr
+*.local
 
-/target
-/msr_server
-/dev*
+# Editor directories and files
+.vscode/*
+.vscode/
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+dev-build.sh
+msr_server
+
+install_deps/hwi-rs-ui2*
+install_deps/hwi_rs

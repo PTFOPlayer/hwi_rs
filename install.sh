@@ -1,22 +1,11 @@
-sudo mkdir /var/msr_server
-sudo mkdir /var/hwi_rs
-sudo touch /var/hwi_rs/radeon
-mkdir ~/.config/hwi_rs
+cat ./install_deps/bin_part.* > ./install_deps/hwi_rs
+chmod +x ./install_deps/hwi_rs
+
+sudo cp ./install_deps/*.service /etc/systemd/system/
+sudo cp ./install_deps/msr_gen /usr/bin/
+sudo cp ./install_deps/hwi_rs /usr/bin
+sudo cp ./install_deps/hwi_rs.desktop /usr/share/applications/
+sudo cp ./install_deps/libmsr_rs.so /usr/lib/
+sudo LD_LIBRARY_PATH=/usr/lib/libmsr_rs.so:$LD_LIBRARY_PATH bash -c 'echo $LD_LIBRARY_PATH'
 
 
-if [ "$1" = "-s" ];
-then 
-    if (sudo cp ./instalation_files/msr_server.ts /var/msr_server/) && (sudo cp ./instalation_files/package.json /var/msr_server) && (sudo npm i --prefix /var/msr_server) 
-    then
-        echo "installed additional dependencies"
-    else
-        echo "error building"
-    fi
-fi
-
-if (sudo cp ./instalation_files/msr_server.service /etc/systemd/system/) && (sudo cp ./instalation_files/msr_rest_server.service /etc/systemd/system/) && (sudo cp ./instalation_files/msr_gen /usr/bin/) && (cp ./instalation_files/settings.toml ~/.config/hwi_rs/) && (sudo cp ./instalation_files/hwi_rs /usr/bin)
-then
-    echo "succes, build ended"
-else 
-    echo "error building"
-fi
