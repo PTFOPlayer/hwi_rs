@@ -25,6 +25,7 @@ export interface MemData {
 export interface NvStats {
   spec: NvSpec,
   util: NvUtil,
+  management: NvManagement
 }
 
 export interface NvSpec {
@@ -37,6 +38,15 @@ export interface NvSpec {
   cuda: CudaCapability,
   pci_e_gen: number,
   pci_e_width: number,
+}
+
+export interface Pci {
+  bus: number,
+  bus_id: String,
+  device: number,
+  domain: number,
+  pci_device_id: number,
+  pci_sub_system_id?: number,
 }
 
 export interface CudaCapability {
@@ -52,13 +62,15 @@ export interface NvUtil {
   memory_free: number,
   current_core_clock: number,
   current_memory_clock: number,
+  power_usage?: number,
 }
 
-export interface Pci {
-  bus: number,
-  bus_id: String,
-  device: number,
-  domain: number,
-  pci_device_id: number,
-  pci_sub_system_id?: number,
+export interface NvManagement {
+  power_limit?: number,
+  target_core_clock?: number,
+  target_memory_clock?: number,
+  default_core_clock?: number,
+  default_memory_clock?: number,
+  app_core_clock?: number,
+  app_memory_clock?: number,
 }
