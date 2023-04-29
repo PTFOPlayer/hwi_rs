@@ -1,10 +1,51 @@
 import Main from "./pages/Main/Main";
 import "./App.scss"
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import NvidiaOc from "./pages/NvidiaOC/NvidiaOc";
+import { invoke } from "@tauri-apps/api";
+import { useState, useEffect, memo } from "react";
+import { NvStats, CpuData, MemData } from "./scripts/interfaces";
+import Bar from "./components/Bar/Bar";
 function App() {
+
+  const [nvidia, setNvidia] = useState<NvStats | null>(null)
+  const [cpu, setCpu] = useState<CpuData | null>(null)
+  const [memory, setMemory] = useState<MemData | null>(null)
+
+  async function setters() {
+    await invoke("tauri_get_nv")
+      .then(res => setNvidia(res as NvStats))
+      .catch(() => setNvidia(null));
+    await invoke("tauri_get_cpu")
+      .then(res => setCpu(res as CpuData))
+      .catch(() => setCpu(null));
+    await invoke("tauri_get_memory")
+      .then(res => setMemory(res as MemData))
+      .catch(() => setMemory(null));
+  }
+
+  useEffect(() => {
+    const timer = setInterval(setters, 500)
+    return () => {
+      clearInterval(timer)
+    }
+  }, [])
+
   return (
-    <div>
-      <Main/>
-     </div>
+    <div className="app">
+      <Bar />
+      <div className="core">
+        <div className="sidebar"></div>
+        <div className="element">
+        <Router>
+          <Routes>
+            <Route path="/" element={<Main cpu={cpu} memory={memory} nvidia={nvidia} />} />
+            <Route path="/nvoc" element={<NvidiaOc nvidia={nvidia} />} />
+          </Routes>
+        </Router>
+        </div>
+      </div>
+    </div>
   );
 }
 

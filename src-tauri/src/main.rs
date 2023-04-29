@@ -67,7 +67,6 @@ fn main() {
     msr.arg("start").arg("msr_server.service");
     _ = msr.output();
 
-    //keeping this for teamplate
     tauri::Builder::default()
         .invoke_handler(generate_handler![
             tauri_get_cpu,
