@@ -6,6 +6,7 @@ import { invoke } from "@tauri-apps/api";
 import { useState, useEffect, memo } from "react";
 import { NvStats, CpuData, MemData } from "./scripts/interfaces";
 import Bar from "./components/Bar/Bar";
+import Sidebar from "./components/Sidebar/Sidebar";
 function App() {
 
   const [nvidia, setNvidia] = useState<NvStats | null>(null)
@@ -35,14 +36,14 @@ function App() {
     <div className="app">
       <Bar />
       <div className="core">
-        <div className="sidebar"></div>
+        <Sidebar />
         <div className="element">
-        <Router>
-          <Routes>
-            <Route path="/" element={<Main cpu={cpu} memory={memory} nvidia={nvidia} />} />
-            <Route path="/nvoc" element={<NvidiaOc nvidia={nvidia} />} />
-          </Routes>
-        </Router>
+          <Router>
+            <Routes>
+              <Route path="/" element={<Main cpu={cpu} memory={memory} nvidia={nvidia} />} />
+              <Route path="/nvoc" element={<NvidiaOc nvidia={nvidia} />} />
+            </Routes>
+          </Router>
         </div>
       </div>
     </div>
