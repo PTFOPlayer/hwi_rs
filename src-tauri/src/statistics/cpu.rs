@@ -22,11 +22,11 @@ pub struct CpuData {
     pub cache: Vec<CacheData>,
 }
 
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct MemMsr {
-    pub total: i32,
-    pub available: i32,
-    pub used: i32,
+    pub mem_total: i32,
+    pub mem_free: i32,
+    pub mem_used: i32,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -36,20 +36,21 @@ pub struct MemData {
     pub used: i32,
 }
 
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct CpuMsr {
     pub vendor: String,
     pub name: String,
-    pub power: f32,
-    pub voltage: f32,
+    pub freq: i64,
+    pub util: f32,
+    pub threads: i32,
+    pub cores: i32,
     pub temperature: f32,
-    pub frequency: i64,
-    pub usage: f32,
-    pub logical_cores: i32,
-    pub physical_cores: i32,
+    pub voltage: f32,
+    pub package_power: f32,
+    pub per_core_freq: Vec<i64>
 }
 
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Msr {
     pub cpu: CpuMsr,
     pub memory: MemMsr,
@@ -103,21 +104,21 @@ pub fn get_cpu() -> Result<CpuData, String> {
     let msr: Msr = {
         match std::fs::read_to_string("/msr_data.toml") {
             Ok(res) => match toml::from_str(res.as_str()) {
-                Ok(res) => res,
-                Err(_) => return Err("error decoding MSR data file".to_owned()),
+                Ok(res) => {println!("{:?}",res); res},
+                Err(err) => return Err(err.message().to_string()),
             },
-            Err(_) => return Err("error reading MSR data file".to_owned()),
+            Err(err) => return Err(err.to_string()),
         }
     };
 
     let name = msr.cpu.name;
-    let load = msr.cpu.usage;
+    let load = msr.cpu.util;
     let temperature = msr.cpu.temperature;
-    let logical_cores = msr.cpu.logical_cores;
-    let physical_cores = msr.cpu.physical_cores;
+    let logical_cores = msr.cpu.threads;
+    let physical_cores = msr.cpu.cores;
     let voltage = msr.cpu.voltage;
     
-    let power = msr.cpu.power;
+    let power = msr.cpu.package_power;
 
     return Ok(CpuData {
         name,
@@ -137,15 +138,15 @@ pub fn get_mem() -> Result<MemData, String> {
         match std::fs::read_to_string("/msr_data.toml") {
             Ok(res) => match toml::from_str(res.as_str()) {
                 Ok(res) => res,
-                Err(_) => return Err("error decoding MSR data file".to_owned()),
+                Err(err) => return Err(err.message().to_string()),
             },
-            Err(_) => return Err("error reading MSR data file".to_owned()),
+            Err(err) => return Err(err.to_string()),
         }
     };
 
     return Ok(MemData {
-        total: msr.memory.total,
-        available: msr.memory.available,
-        used: msr.memory.used,
+        total: msr.memory.mem_total,
+        available: msr.memory.mem_free,
+        used: msr.memory.mem_used,
     });
 }

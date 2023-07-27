@@ -1,8 +1,0 @@
-[Unit]
-Description="generates data from msr on port 3230"
-
-[Service]
-ExecStart = npx ts-node /var/msr_server/msr_server.ts
-
-[Install]
-WantedBy=multi-user.target

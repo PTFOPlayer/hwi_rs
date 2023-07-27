@@ -77,6 +77,4 @@ fn main() {
         ])
         .run(generate_context!())
         .expect("error while running tauri application");
-
-    ()
 }

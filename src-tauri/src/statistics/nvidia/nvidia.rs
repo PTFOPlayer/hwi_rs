@@ -26,8 +26,8 @@ pub fn get_nv() -> Result<NvStats, NvmlError> {
                 pci_sub_system_id: pci_info.pci_sub_system_id,
             };
 
-            let cuda_major = device.cuda_compute_capability()?.major;
-            let cuda_minor = device.cuda_compute_capability()?.minor;
+            let cuda_major = device.cuda_compute_capability().unwrap().major;
+            let cuda_minor = device.cuda_compute_capability().unwrap().minor;
             let cuda = CudaCapability {
                 major: cuda_major,
                 minor: cuda_minor,
@@ -46,47 +46,28 @@ pub fn get_nv() -> Result<NvStats, NvmlError> {
             let temperature =
                 device.temperature(nvml_wrapper::enum_wrappers::device::TemperatureSensor::Gpu)?;
 
-            let power_limit = match device.enforced_power_limit() {
-                Ok(pwr) => Some(pwr),
-                Err(_) => None,
-            };
+            let power_limit = device.enforced_power_limit().ok();
 
-            let power_usage = match device.power_usage() {
-                Ok(pwr) => Some(pwr),
-                Err(_) => None,
-            };
+            let power_usage = device.power_usage().ok();
 
-            let target_core_clock =
-                match device.clock(device::Clock::Graphics, device::ClockId::TargetAppClock) {
-                    Ok(res) => Some(res),
-                    Err(_) => None,
-                };
-            let target_memory_clock =
-                match device.clock(device::Clock::Memory, device::ClockId::TargetAppClock) {
-                    Ok(res) => Some(res),
-                    Err(_) => None,
-                };
+            let target_core_clock = device
+                .clock(device::Clock::Graphics, device::ClockId::TargetAppClock)
+                .ok();
+            
+            let target_memory_clock = device
+                .clock(device::Clock::Memory, device::ClockId::TargetAppClock)
+                .ok();
+            
+            let default_core_clock = device
+                .clock(device::Clock::Graphics, device::ClockId::DefaultAppClock)
+                .ok();
+            
+            let default_memory_clock = device
+                .clock(device::Clock::Memory, device::ClockId::DefaultAppClock)
+                .ok();
 
-            let default_core_clock =
-                match device.clock(device::Clock::Graphics, device::ClockId::DefaultAppClock) {
-                    Ok(res) => Some(res),
-                    Err(_) => None,
-                };
-            let default_memory_clock =
-                match device.clock(device::Clock::Memory, device::ClockId::DefaultAppClock) {
-                    Ok(res) => Some(res),
-                    Err(_) => None,
-                };
-
-            let app_core_clock = match device.applications_clock(device::Clock::Graphics) {
-                Ok(res) => Some(res),
-                Err(_) => None,
-            };
-
-            let app_memory_clock = match device.applications_clock(device::Clock::Memory) {
-                Ok(res) => Some(res),
-                Err(_) => None,
-            };
+            let app_core_clock = device.applications_clock(device::Clock::Graphics).ok();
+            let app_memory_clock = device.applications_clock(device::Clock::Memory).ok();
 
             let data = NvStats {
                 spec: NvSpec {
@@ -122,31 +103,6 @@ pub fn get_nv() -> Result<NvStats, NvmlError> {
             };
             Ok(data)
         }
-        Err(err) => match err {
-            NvmlError::SetReleaseFailed => Err(NvmlError::SetReleaseFailed),
-            NvmlError::GetPciInfoFailed => Err(NvmlError::GetPciInfoFailed),
-            NvmlError::PciInfoToCFailed => Err(NvmlError::PciInfoToCFailed),
-            NvmlError::Uninitialized => Err(NvmlError::Uninitialized),
-            NvmlError::InvalidArg => Err(NvmlError::InvalidArg),
-            NvmlError::NotSupported => Err(NvmlError::NotSupported),
-            NvmlError::NoPermission => Err(NvmlError::NoPermission),
-            NvmlError::NotFound => Err(NvmlError::NotFound),
-            NvmlError::InsufficientPower => Err(NvmlError::InsufficientPower),
-            NvmlError::DriverNotLoaded => Err(NvmlError::DriverNotLoaded),
-            NvmlError::Timeout => Err(NvmlError::Timeout),
-            NvmlError::IrqIssue => Err(NvmlError::IrqIssue),
-            NvmlError::LibraryNotFound => Err(NvmlError::LibraryNotFound),
-            NvmlError::FunctionNotFound => Err(NvmlError::FunctionNotFound),
-            NvmlError::CorruptedInfoROM => Err(NvmlError::CorruptedInfoROM),
-            NvmlError::GpuLost => Err(NvmlError::GpuLost),
-            NvmlError::ResetRequired => Err(NvmlError::ResetRequired),
-            NvmlError::OperatingSystem => Err(NvmlError::OperatingSystem),
-            NvmlError::LibRmVersionMismatch => Err(NvmlError::LibRmVersionMismatch),
-            NvmlError::InUse => Err(NvmlError::InUse),
-            NvmlError::InsufficientMemory => Err(NvmlError::InsufficientMemory),
-            NvmlError::NoData => Err(NvmlError::NoData),
-            NvmlError::VgpuEccNotSupported => Err(NvmlError::VgpuEccNotSupported),
-            _ => Err(NvmlError::Unknown),
-        },
+        Err(_) => Err(NvmlError::NotFound),
     }
 }

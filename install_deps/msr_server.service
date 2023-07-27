@@ -2,7 +2,7 @@
 Description="generates data from msr in file /msr_data.toml"
 
 [Service]
-ExecStart = /usr/bin/msr_gen -f
+ExecStart = /usr/bin/msr_gen -r
 
 [Install]
 WantedBy=multi-user.target
