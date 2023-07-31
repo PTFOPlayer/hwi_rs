@@ -16,7 +16,7 @@ pub struct CpuData {
     pub physical_cores: i32,
     pub power: f32,
     pub voltage: f32,
-    pub frequency: Vec<f32>,
+    pub frequency: Vec<i64>,
     pub load: f32,
     pub temperature: i32,
     pub cache: Vec<CacheData>,
@@ -47,7 +47,7 @@ pub struct CpuMsr {
     pub temperature: f32,
     pub voltage: f32,
     pub package_power: f32,
-    pub per_core_freq: Vec<i64>
+    pub per_core_freq: Vec<i64>,
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -57,28 +57,7 @@ pub struct Msr {
 }
 
 pub fn get_cpu() -> Result<CpuData, String> {
-    let per_core_frequency;
-    match fs::read_to_string("/proc/cpuinfo") {
-        Ok(res) => {
-            let res_c = res.clone();
-            let split = res_c.split(&['\t', '\n']);
-            let splitted = split.collect::<Vec<&str>>();
-            per_core_frequency = {
-                let mut freq = vec![];
-                let s_local = splitted.clone();
-                for i in 0..s_local.len() {
-                    if s_local[i].contains("MHz") {
-                        match s_local[i + 2][2..].to_owned().parse::<f32>() {
-                            Ok(res) => freq.push(res),
-                            Err(_) => {}
-                        };
-                    }
-                }
-                freq
-            };
-        }
-        Err(err) => return Err(err.to_string()),
-    };
+    let req = reqwest::blocking::get("http://localhost:8000");
 
     let cpuid = raw_cpuid::CpuId::new();
     let cache = match cpuid.get_cache_parameters() {
@@ -102,24 +81,31 @@ pub fn get_cpu() -> Result<CpuData, String> {
     }
 
     let msr: Msr = {
-        match std::fs::read_to_string("/msr_data.toml") {
-            Ok(res) => match toml::from_str(res.as_str()) {
-                Ok(res) => {println!("{:?}",res); res},
-                Err(err) => return Err(err.message().to_string()),
-            },
-            Err(err) => return Err(err.to_string()),
-        }
-    };
+        let res = match req {
+            Ok(res) => Ok(res),
+            Err(err) => Err(err.to_string()),
+        };
 
+        let data = match res?.text() {
+            Ok(res) => Ok(res),
+            Err(err) => Err(err.to_string()),
+        };
+        let msr = match serde_json::from_str(&data?) {
+            Ok(res) => Ok(res),
+            Err(err) => Err(err.to_string()),
+        };
+        msr?
+    };
+    
     let name = msr.cpu.name;
     let load = msr.cpu.util;
     let temperature = msr.cpu.temperature;
     let logical_cores = msr.cpu.threads;
     let physical_cores = msr.cpu.cores;
     let voltage = msr.cpu.voltage;
-    
+    let per_core_frequency = msr.cpu.per_core_freq;
     let power = msr.cpu.package_power;
-
+    
     return Ok(CpuData {
         name,
         logical_cores,
@@ -134,14 +120,23 @@ pub fn get_cpu() -> Result<CpuData, String> {
 }
 
 pub fn get_mem() -> Result<MemData, String> {
+    let req = reqwest::blocking::get("http://localhost:8000");
+
     let msr: Msr = {
-        match std::fs::read_to_string("/msr_data.toml") {
-            Ok(res) => match toml::from_str(res.as_str()) {
-                Ok(res) => res,
-                Err(err) => return Err(err.message().to_string()),
-            },
-            Err(err) => return Err(err.to_string()),
-        }
+        let res = match req {
+            Ok(res) => Ok(res),
+            Err(err) => Err(err.to_string()),
+        };
+
+        let data = match res?.text() {
+            Ok(res) => Ok(res),
+            Err(err) => Err(err.to_string()),
+        };
+        let msr = match serde_json::from_str(&data?) {
+            Ok(res) => Ok(res),
+            Err(err) => Err(err.to_string()),
+        };
+        msr?
     };
 
     return Ok(MemData {

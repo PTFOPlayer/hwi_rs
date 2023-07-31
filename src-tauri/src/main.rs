@@ -12,7 +12,7 @@ fn tauri_get_cpu() -> Result<CpuData, ()> {
     match get_cpu() {
         Ok(res) => Ok(res),
         Err(err) => {
-            println!("{:?}", err);   
+            println!("rs#{:?}", err);   
             Err(())
         },
     }
@@ -23,7 +23,7 @@ fn tauri_get_memory() -> Result<MemData, ()> {
     match get_mem() {
         Ok(res) => Ok(res),
         Err(err) => {
-            println!("{:?}", err);   
+            println!("rs#{:?}", err);   
             Err(())
         },
     }
@@ -34,7 +34,7 @@ fn tauri_get_nv() -> Result<NvStats, ()> {
     match get_nv() {
         Ok(res) => Ok(res),
         Err(err) => {
-            println!("{:?}", err);   
+            println!("rs#{:?}", err);   
             Err(())
         },
     }
@@ -45,7 +45,7 @@ fn tauri_get_radeon() -> Result<RadeonStats, ()> {
     match get_radeon() {
         Ok(res) => Ok(res),
         Err(err) => {
-            println!("{:?}", err);   
+            println!("rs#{:?}", err);   
             Err(())
         },
     }
@@ -56,7 +56,7 @@ fn tauri_get_intel_gpu() -> Result<IgStats, ()> {
     match get_intel_gpu() {
         Ok(res) => Ok(res),
         Err(err) => {
-            println!("{:?}", err);   
+            println!("rs#{:?}", err);   
             Err(())
         },
     }

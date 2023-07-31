@@ -26,7 +26,7 @@ function App() {
   }
 
   useEffect(() => {
-    const timer = setInterval(setters, 500)
+    const timer = setInterval(setters, 1000)
     return () => {
       clearInterval(timer)
     }
