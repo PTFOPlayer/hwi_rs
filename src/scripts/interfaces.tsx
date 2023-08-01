@@ -3,23 +3,30 @@ export interface CacheData {
   level: number,
   cache_type: String
 }
-  
-export interface CpuData {
-  name: String,
-  logical_cores: number,
-  physical_cores: number,
-  power: number,
-  voltage: number,
-  frequency: Array<number>,
-  load: number,
-  temperature: number,
-  cache: Array<CacheData>,
-}
 
 export interface MemData {
-  total: number,
-  available: number,
-  used: number
+  mem_total: number,
+  mem_free: number,
+  mem_used: number,
+}
+
+export interface CpuData {
+  vendor: String,
+  name: String,
+  freq: number,
+  util: number,
+  threads: number,
+  cores: number,
+  temperature: number,
+  voltage: number,
+  package_power: number,
+  per_core_freq: Array<number>,
+  cache: Array<CacheData>
+}
+
+export interface Msr {
+  cpu: CpuData,
+  memory: MemData,
 }
 
 export interface NvStats {

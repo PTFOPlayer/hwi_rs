@@ -1,17 +1,8 @@
-import { CpuData, MemData } from "../../scripts/interfaces";
+import { Msr } from "../../scripts/interfaces";
 import "./cpu.scss"
-export default function Cpu(data: { cpu: CpuData, memory: MemData }) {
-  let cpu = data.cpu
-  let memory = data.memory
-
-  let avg_frequency = () => {
-    let len = cpu.frequency.length;
-    let sum = 0
-    for (let i = 0; i < len; i++) {
-      sum += cpu.frequency[i]
-    };
-    return sum / len
-  }
+export default function Cpu(data: { msr:Msr  }) {
+  let cpu = data.msr.cpu
+  let memory = data.msr.memory
 
   return (
     <div className="cpu">
@@ -19,16 +10,16 @@ export default function Cpu(data: { cpu: CpuData, memory: MemData }) {
       <div className="data">
         <div>
           <h3> General </h3>
-          <p> Usage: {cpu.load.toPrecision(5)} % </p>
-          <p> Avarage frequency: {avg_frequency().toPrecision(5)} MHz </p>
-          <p> Power: {cpu.power.toPrecision(5)} W </p>
+          <p> Usage: {cpu.util.toPrecision(5)} % </p>
+          <p> Avarage frequency: {cpu.freq.toPrecision(5)} MHz </p>
+          <p> Power: {cpu.package_power.toPrecision(5)} W </p>
           <p> Voltage: {cpu.voltage.toPrecision(5)} V </p>
-          <p> Temperature: {cpu.temperature} °C </p>
+          <p> Temperature: {cpu.temperature.toPrecision(5)} °C </p>
         </div>
         <div>
           <h3> Specyfication </h3>
-          <p> Cores: {cpu.physical_cores} </p>
-          <p> Threads: {cpu.logical_cores} </p>
+          <p> Cores: {cpu.cores} </p>
+          <p> Threads: {cpu.threads} </p>
           {cpu.cache ? cpu.cache.map((e) => {
             let size = e.size / 1024
             return (<p>Cache L{e.level} {e.cache_type}: {e.size / 1024 > 1024 ? <span>{size / 1024} MB </span> : <span>{size} KB </span>}</p>)
@@ -36,15 +27,15 @@ export default function Cpu(data: { cpu: CpuData, memory: MemData }) {
         </div>
         <div>
           <h3> Per core frequency </h3>
-          {cpu.frequency.map((e, key) => {
+          {cpu.per_core_freq.map((e, key) => {
             return <><p>Core: {key}: {e.toPrecision(5)}</p></>
           })}
         </div>
         <div>
           <h3> Memory </h3>
-          <p>Total: {memory.total}</p>
-          <p>Used: {memory.used}</p>
-          <p>Available: {memory.available}</p>
+          <p>Total: {memory.mem_total}</p>
+          <p>Used: {memory.mem_used}</p>
+          <p>Available: {memory.mem_free}</p>
         </div>
       </div>
     </div>

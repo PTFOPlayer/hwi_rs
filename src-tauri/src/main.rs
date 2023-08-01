@@ -8,8 +8,8 @@ use statistics::*;
 use tauri::{generate_context, generate_handler};
 
 #[tauri::command]
-fn tauri_get_cpu() -> Result<CpuData, ()> {
-    match get_cpu() {
+fn tauri_get_msr_data() -> Result<Msr, ()> {
+    match get_msr() {
         Ok(res) => Ok(res),
         Err(err) => {
             println!("rs#{:?}", err);   
@@ -18,16 +18,6 @@ fn tauri_get_cpu() -> Result<CpuData, ()> {
     }
 }
 
-#[tauri::command]
-fn tauri_get_memory() -> Result<MemData, ()> {
-    match get_mem() {
-        Ok(res) => Ok(res),
-        Err(err) => {
-            println!("rs#{:?}", err);   
-            Err(())
-        },
-    }
-}
 
 #[tauri::command]
 fn tauri_get_nv() -> Result<NvStats, ()> {
@@ -69,8 +59,7 @@ fn main() {
 
     tauri::Builder::default()
         .invoke_handler(generate_handler![
-            tauri_get_cpu,
-            tauri_get_memory,
+            tauri_get_msr_data,
             tauri_get_nv,
             tauri_get_radeon,
             tauri_get_intel_gpu
