@@ -22,7 +22,7 @@
       "active": true,
       "icon": ["./icons/32x32.png"],
       "identifier": "",
-      "targets": "app"
+      "targets": "appimage"
     },
     "security": {
       "csp": null

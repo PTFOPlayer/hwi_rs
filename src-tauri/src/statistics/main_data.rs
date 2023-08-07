@@ -35,6 +35,7 @@ pub struct Msr {
     pub memory: MemMsr,
 }
 
+#[inline(always)]
 pub fn get_msr() -> Result<Msr, String> {
     let req = reqwest::blocking::get("http://localhost:8000");
 

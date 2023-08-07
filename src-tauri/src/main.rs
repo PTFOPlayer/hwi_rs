@@ -38,7 +38,7 @@ fn tauri_get_radeon() -> Result<RadeonStats, ()> {
             println!("rs#{:?}", err);   
             Err(())
         },
-    }
+    } 
 }
 
 #[tauri::command]
@@ -54,7 +54,7 @@ fn tauri_get_intel_gpu() -> Result<IgStats, ()> {
 
 fn main() {
     let mut msr = Command::new("systemctl");
-    msr.arg("start").arg("msr_server.service");
+    msr.args(["start","msr_server.service"]);
     _ = msr.output();
 
     tauri::Builder::default()

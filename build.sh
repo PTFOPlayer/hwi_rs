@@ -4,11 +4,11 @@ cd msr_server
 ./build.sh
 cd ..
 
-cargo tauri build 
+cargo tauri build --verbose
 pdir=./install_deps
-cp src-tauri/target/release/bundle/appimage/hwi-rs-ui2_0.0.0_amd64.AppImage $pdir
+cp src-tauri/target/release/bundle/appimage/hwi-rs*amd64.AppImage $pdir
 cd $pdir
-split -b95M hwi-rs-ui2_0.0.0_amd64.AppImage bin_part.
+split -b95M hwi-rs*amd64.AppImage bin_part.
 cd ..
 
 cp msr_server/msr_server.service $pdir

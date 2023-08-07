@@ -6,6 +6,7 @@ lazy_static! {
     static ref NVML_R: Result<Nvml, NvmlError> = Nvml::init();
 }
 
+#[inline(always)]
 pub fn get_nv() -> Result<NvStats, NvmlError> {
     match NVML_R.as_ref() {
         Ok(nvml) => {
@@ -53,15 +54,15 @@ pub fn get_nv() -> Result<NvStats, NvmlError> {
             let target_core_clock = device
                 .clock(device::Clock::Graphics, device::ClockId::TargetAppClock)
                 .ok();
-            
+
             let target_memory_clock = device
                 .clock(device::Clock::Memory, device::ClockId::TargetAppClock)
                 .ok();
-            
+
             let default_core_clock = device
                 .clock(device::Clock::Graphics, device::ClockId::DefaultAppClock)
                 .ok();
-            
+
             let default_memory_clock = device
                 .clock(device::Clock::Memory, device::ClockId::DefaultAppClock)
                 .ok();
