@@ -1,5 +1,3 @@
-git clone https://github.com/ptfoplayer/msr_server
-
 cd msr_server
 ./build.sh
 cd ..

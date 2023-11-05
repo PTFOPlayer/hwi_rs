@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from '@tauri-apps/api/tauri'
-import { CpuData, MemData, Msr, NvStats } from '../../scripts/interfaces'
+import {Msr, NvStats } from '../../scripts/interfaces'
 import Cpu from "../../components/Cpu/Cpu";
 import Nvidia from "../../components/Nvidia/Nvidia";
 

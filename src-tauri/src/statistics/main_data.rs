@@ -1,45 +1,40 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct MsrData {
+    pub voltage: f64,
+    pub package_power: f64,
+    pub vendor: String,
+    pub name: String,
+    pub freq: u64,
+    pub util: f64,
+    pub threads: i32,
+    pub cores: i32,
+    pub temperature: f32,
+    pub per_core_freq: Vec<u64>,
+    pub mem_total: u64,
+    pub mem_free: u64,
+    pub mem_used: u64,
+    pub cache: Vec<CacheData>,
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct Data {
+    core: MsrData
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct CacheData {
     pub size: i64,
     pub level: u8,
     pub cache_type: String,
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
-pub struct MemMsr {
-    pub mem_total: i32,
-    pub mem_free: i32,
-    pub mem_used: i32,
-}
-
-#[derive(Deserialize, Serialize, Clone, Debug)]
-pub struct CpuMsr {
-    pub vendor: String,
-    pub name: String,
-    pub freq: i64,
-    pub util: f32,
-    pub threads: i32,
-    pub cores: i32,
-    pub temperature: f32,
-    pub voltage: f32,
-    pub package_power: f32,
-    pub per_core_freq: Vec<i64>,
-    pub cache: Vec<CacheData>
-}
-
-#[derive(Deserialize, Serialize, Clone, Debug)]
-pub struct Msr {
-    pub cpu: CpuMsr,
-    pub memory: MemMsr,
-}
-
 #[inline(always)]
-pub fn get_msr() -> Result<Msr, String> {
+pub fn get_msr() -> Result<MsrData, String> {
     let req = reqwest::blocking::get("http://localhost:8000");
 
-    let msr: Msr = {
+    let msr: MsrData = {
         let res = match req {
             Ok(res) => Ok(res),
             Err(err) => Err(err.to_string()),
@@ -49,11 +44,11 @@ pub fn get_msr() -> Result<Msr, String> {
             Ok(res) => Ok(res),
             Err(err) => Err(err.to_string()),
         };
-        let msr = match serde_json::from_str(&data?) {
+        let msr: Result<Data, String> = match serde_json::from_str(&data?) {
             Ok(res) => Ok(res),
             Err(err) => Err(err.to_string()),
         };
-        msr?
+        msr?.core
     };
     
     Ok(msr)

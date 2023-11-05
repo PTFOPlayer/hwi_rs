@@ -4,13 +4,7 @@ export interface CacheData {
   cache_type: String
 }
 
-export interface MemData {
-  mem_total: number,
-  mem_free: number,
-  mem_used: number,
-}
-
-export interface CpuData {
+export interface Msr {
   vendor: String,
   name: String,
   freq: number,
@@ -21,12 +15,10 @@ export interface CpuData {
   voltage: number,
   package_power: number,
   per_core_freq: Array<number>,
+  mem_total: number,
+  mem_free: number,
+  mem_used: number,
   cache: Array<CacheData>
-}
-
-export interface Msr {
-  cpu: CpuData,
-  memory: MemData,
 }
 
 export interface NvStats {

@@ -8,7 +8,7 @@ use statistics::*;
 use tauri::{generate_context, generate_handler};
 
 #[tauri::command]
-fn tauri_get_msr_data() -> Result<Msr, ()> {
+fn tauri_get_msr_data() -> Result<MsrData, ()> {
     match get_msr() {
         Ok(res) => Ok(res),
         Err(err) => {
