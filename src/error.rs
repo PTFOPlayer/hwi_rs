@@ -1,6 +1,7 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum AppError {
     ReqwestError(String),
+    NonInitiated
 }
 
 impl From<String> for AppError {
