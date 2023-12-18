@@ -1,6 +1,0 @@
-[Desktop Entry]
-Type = Application
-Version = 1.0
-Name = hwi_rs
-Exec = /usr/bin/hwi_rs
-Terminal = false
