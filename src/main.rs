@@ -1,7 +1,7 @@
 mod misc;
 mod statistics;
 use error::AppError;
-use misc::prec_100;
+use misc::prec;
 use statistics::*;
 mod error;
 
@@ -14,7 +14,7 @@ use iced::{
     executor,
     theme::Palette,
     widget::{column, container, row, text, Text},
-    Application, Color, Command, Element, Renderer, Settings, Subscription, Theme,
+    Application, Color, Command, Element, Settings, Subscription, Theme,
 };
 
 fn main() {
@@ -30,18 +30,19 @@ fn main() {
 struct StaticElements<'a> {
     cpu_title: Text<'a>,
     cpu_cache: Vec<(Text<'a>, Text<'a>)>,
+    cores_threads: (Text<'a>, Text<'a>),
 }
 impl Default for StaticElements<'_> {
     fn default() -> Self {
         Self {
             cpu_title: text("Unknown"),
             cpu_cache: vec![],
+            cores_threads: (text(""), text("")),
         }
     }
 }
 
 struct App {
-    tick: u32,
     url: String,
     msr: Result<MsrData, AppError>,
     prep: u8,
@@ -74,7 +75,9 @@ impl Application for App {
 
     fn update(&mut self, message: Self::Message) -> iced::Command<Message> {
         match message {
-            Message::Tick => self.tick += 1,
+            Message::Tick => {
+                return Command::perform(get_data(self.url.clone()), |x| Message::Msr(x))
+            }
             Message::Msr(msr) => {
                 if self.prep < 3 {
                     self.msr = msr;
@@ -84,9 +87,6 @@ impl Application for App {
                     self.msr = msr
                 }
             }
-        }
-        if self.tick % 20 == 0 {
-            return Command::perform(get_data(self.url.clone()), |x| Message::Msr(x));
         }
         Command::none()
     }
@@ -108,7 +108,7 @@ impl Application for App {
     }
 
     fn subscription(&self) -> Subscription<Self::Message> {
-        let tick = iced::time::every(Duration::from_millis(100)).map(|_| Message::Tick);
+        let tick = iced::time::every(Duration::from_secs_f64(2.)).map(|_| Message::Tick);
         Subscription::batch(vec![tick])
     }
 }
@@ -116,7 +116,6 @@ impl Application for App {
 impl Default for App {
     fn default() -> Self {
         Self {
-            tick: Default::default(),
             url: "http://localhost:8000".to_string(),
             msr: Err(AppError::NonInitiated),
             static_elements: StaticElements::default(),
@@ -155,12 +154,17 @@ impl App {
                     cache_vec.push((title, c_data));
                 }
                 self.static_elements.cpu_cache = cache_vec;
+
+                self.static_elements.cores_threads = (
+                    text(format!("Cores: {}", data.cores)).size(20),
+                    text(format!("Threads: {}", data.threads)).size(20),
+                );
             }
             Err(_) => {}
         };
     }
 
-    fn generate_cpu<'a>(&self) -> impl Into<Element<'a, Message, Renderer>> {
+    fn generate_cpu<'a>(&self) -> impl Into<Element<'a, Message>> {
         let msr = &self.msr;
         let data = match msr {
             Ok(ok) => ok,
@@ -176,47 +180,35 @@ impl App {
         let mut title_palette = Palette::DARK;
         title_palette.text = Color::new(0.3, 0.9, 0.1, 1.0);
 
-        let mut cache_section: iced::widget::Column<'a, Message, Renderer> = column![];
+        let mut cache_section: iced::widget::Column<'a, Message> = column![];
         for c in &self.static_elements.cpu_cache {
             cache_section =
                 cache_section.push(row![c.0.clone(), c.1.clone()].padding(5).spacing(10));
         }
 
-        let core_thread_info = row![
-            text(format!("Cores: {}", data.cores)).size(20),
-            text(format!("Threads: {}", data.threads)).size(20)
-        ]
-        .spacing(20);
-
         let mut temp_txt = text(format!(
             "Temperature: {:>7}°C",
-            prec_100(data.temperature as f64)
+            prec(data.temperature as f64)
         ))
         .size(20);
+
+        let avg_freq: Text<'a> = text(format!("Avg Frequency: {}", data.freq)).size(20);
         if data.temperature > 50. {
             temp_txt = temp_txt.style(Color::new(1., 0., 0., 1.));
         };
-        let mut usage_txt = text(format!("Util: {:>7}%", prec_100(data.util))).size(20);
+
+        let mut usage_txt: Text<'a> = text(format!("Util: {:>7}%", prec(data.util))).size(20);
         if data.util > 50. {
             usage_txt = usage_txt.style(Color::new(1., 0.1, 0.5, 1.));
         };
-        let freq_temp_usage_info = row![
-            text(format!("Frequency: {:>7}Mhz", data.freq)).size(20),
-            temp_txt,
-            usage_txt
-        ]
-        .spacing(20);
 
-        let volt = text(format!("Power: {:>7}W", prec_100(data.package_power))).size(20);
-        let pwr = text(format!("Voltage: {:>7}V", prec_100(data.voltage))).size(20);
-        let voltage_pwr_info = row![volt, pwr].spacing(20);
+        let volt: Text<'a> = text(format!("Power: {:>7}W", prec(data.package_power))).size(20);
+        let pwr: Text<'a> = text(format!("Voltage: {:>7}V", prec(data.voltage))).size(20);
 
-        return column![
-            self.static_elements.cpu_title.clone(),
-            core_thread_info,
-            freq_temp_usage_info,
-            voltage_pwr_info,
-            cache_section
-        ];
+        let col1 = column![self.static_elements.cores_threads.0.clone(), temp_txt, volt];
+        let col2 = column![self.static_elements.cores_threads.1.clone(), usage_txt, pwr];
+        let col3 = column![text(""), avg_freq];
+        let row = row![col1, col2, col3].spacing(35);
+        return column![self.static_elements.cpu_title.clone(), row, cache_section];
     }
 }
