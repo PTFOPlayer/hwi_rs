@@ -1,14 +1,11 @@
-
+use std::time::{Duration, Instant, SystemTime};
 
 use crate::error::AppError;
 use crate::misc::prec;
-use crate::{Message, App};
-use iced::widget::{Column, text, column, row};
-use iced::Color;
-use iced::theme::Palette;
+use crate::{App, Message};
 use iced::widget::Text;
-
-
+use iced::widget::{column, row, text, Column};
+use iced::Color;
 
 impl App {
     #[inline]
@@ -29,13 +26,11 @@ impl App {
                     }
                 };
 
-                let mut title_palette = Palette::DARK;
-                title_palette.text = Color::new(0.3, 0.9, 0.1, 1.0);
-
                 let mut cache_vec = vec![];
                 for c in &data.cache {
                     let title = format!("Cache L{} {}: ", c.level, c.cache_type);
-                    let title: Text<'static> = text(title).size(21).style(title_palette.text);
+                    let title: Text<'static> =
+                        text(title).size(21).style(Color::new(0.3, 0.8, 0.3, 1.0));
                     let c_data = format!("{} kB", c.size as f64 / 1024.);
                     let c_data: Text<'static> = text(c_data).size(21);
                     cache_vec.push((title, c_data));
@@ -64,10 +59,7 @@ impl App {
             }
         };
 
-        let mut title_palette = Palette::DARK;
-        title_palette.text = Color::new(0.3, 0.9, 0.1, 1.0);
-
-        let mut cache_section: iced::widget::Column<'a, Message> = column![];
+        let mut cache_section: Column<'a, Message> = column![];
         for c in &self.static_elements.cpu_cache {
             cache_section =
                 cache_section.push(row![c.0.clone(), c.1.clone()].padding(5).spacing(10));
@@ -97,5 +89,31 @@ impl App {
         let col3 = column![text(""), avg_freq];
         let row = row![col1, col2, col3].spacing(35);
         return column![self.static_elements.cpu_title.clone(), row, cache_section];
+    }
+
+    pub fn generate_sys<'a>(&self) -> Column<'a, Message> {
+        let sys = match &self.sys {
+            Ok(res) => res,
+            Err(err) => {
+                println!("{:?}", err);
+                return column![];
+            }
+        };
+
+        let mut host_name = sys.host_name.clone();
+        if host_name.contains(".home") {
+            host_name = host_name.strip_suffix(".home").unwrap().to_owned();
+        }
+
+        let title = text(host_name);
+        let system_time = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap();
+        let start_time = Duration::from_secs(sys.boot_time);
+        let t = (system_time - start_time).as_secs();
+        let h = t / 3600;
+        let m = (t - (h * 3600)) / 60;
+        let since_boot = text(format!("since boot: {}h, {}m", h, m));
+        return column![title, since_boot];
     }
 }

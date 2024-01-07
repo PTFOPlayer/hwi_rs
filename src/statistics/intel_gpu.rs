@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::process::Command;
 
 use serde::{Serialize, Deserialize};
@@ -13,8 +14,9 @@ pub struct IgStats {
     pub vcs_usg: String,
     pub vecs_usg: String,
 }
-
+// there is no good api for intel gpu at this moment
 // sudo intel_gpu_top -o - | awk '{print>"current";close("current")}'
+#[deprecated]
 pub fn get_intel_gpu() -> Result<IgStats, ()> {
     let mut getter = Command::new("cat");
     getter.arg("./current");

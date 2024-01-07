@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::statistics::nvidia::structs::*;
 use lazy_static::lazy_static;
 use nvml_wrapper::{enum_wrappers::device, error::NvmlError, Nvml};
