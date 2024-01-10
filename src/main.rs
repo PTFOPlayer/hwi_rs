@@ -3,6 +3,7 @@ mod misc;
 mod state;
 mod statistics;
 use error::AppError;
+use plotters_iced::ChartWidget;
 use state::{GpuState, State};
 use statistics::*;
 mod error;
@@ -25,14 +26,16 @@ fn main() {
 
     let mut settings = Settings::default();
     settings.window.transparent = true;
+
     let _ = App::run(settings);
 }
 
 struct StaticElements<'a> {
     cpu_title: Text<'a>,
     cpu_cache: Vec<(Text<'a>, Text<'a>)>,
-    cores_threads: (Text<'a>, Text<'a>)
+    cores_threads: (Text<'a>, Text<'a>),
 }
+
 impl<'a> Default for StaticElements<'a> {
     fn default() -> Self {
         Self {
@@ -46,19 +49,20 @@ impl<'a> Default for StaticElements<'a> {
 struct App {
     state: State,
     url: String,
-    msr: Result<MsrData, AppError>,
-    sys: Result<SystemInfo, AppError>,
+    msr: MsrData,
+    sys: SystemInfo,
     static_elements: StaticElements<'static>,
 }
 
 #[derive(Debug, Clone)]
 enum Message {
     Tick,
-    Msr(Result<MsrData, AppError>),
+    Msr(MsrData),
     Prep {
         msr: Result<MsrData, AppError>,
         sys: Result<SystemInfo, AppError>,
     },
+    Fail(AppError),
 }
 
 impl Application for App {
@@ -85,15 +89,28 @@ impl Application for App {
     fn update(&mut self, message: Self::Message) -> iced::Command<Message> {
         match message {
             Message::Prep { msr, sys } => {
-                self.msr = msr;
-                self.sys = sys;
+                match msr {
+                    Ok(res) => self.msr = res,
+                    Err(err) => self.state.fails.msr_fail = Some(err),
+                }
+                match sys {
+                    Ok(res) => self.sys = res,
+                    Err(err) => self.state.fails.sys_fail = Some(err),
+                }
                 self.generate_static_cpu();
-                
             }
             Message::Tick => {
-                return Command::perform(get_data(self.url.clone()), |x| Message::Msr(x))
+                return Command::perform(get_data(self.url.clone()), |x| match x {
+                    Ok(res) => Message::Msr(res),
+                    Err(err) => Message::Fail(err),
+                });
             }
-            Message::Msr(msr) => self.msr = msr,
+            Message::Msr(msr) => {
+                self.state.cpu_temp_graph.modify_graph(msr.temperature);
+                self.state.cpu_pwr_graph.modify_graph(msr.package_power);
+                self.msr = msr;
+            }
+            Message::Fail(fail) => self.state.fails.msr_fail = Some(fail),
         }
         Command::none()
     }
@@ -101,7 +118,12 @@ impl Application for App {
     fn view(&self) -> iced::Element<'_, Self::Message> {
         let cpu = self.generate_cpu();
         let sys = self.generate_sys();
-        let content = column![cpu, sys];
+        let cpu_pwr =
+            ChartWidget::new(self.state.cpu_pwr_graph.clone()).height(iced::Length::Fixed(250.));
+        let cpu_temp =
+            ChartWidget::new(self.state.cpu_temp_graph.clone()).height(iced::Length::Fixed(250.));
+        let content = column![sys, cpu, cpu_pwr, cpu_temp].spacing(50);
+
         container(content).padding(10).into()
     }
 
@@ -132,8 +154,8 @@ impl Default for App {
         Self {
             state: State::default(),
             url: "http://localhost:8000".to_string(),
-            msr: Err(AppError::NonInitiated),
-            sys: Err(AppError::NonInitiated),
+            msr: MsrData::default(),
+            sys: SystemInfo::default(),
             static_elements: StaticElements::default(),
         }
     }

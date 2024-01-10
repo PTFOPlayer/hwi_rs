@@ -1,8 +1,7 @@
 #[derive(Debug, Clone)]
 pub enum AppError {
     ReqwestError(String),
-    SerdeError(String),
-    NonInitiated
+    SerdeError(String)
 }
 
 impl From<reqwest::Error> for AppError {
