@@ -1,0 +1,1 @@
+// there is no vaiable api for intel gpu's
