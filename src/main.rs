@@ -14,7 +14,7 @@ use std::process::Command as sysCommand;
 // use main_data::{get_data, MsrData};
 use iced::{
     executor,
-    widget::{column, container, text, Text},
+    widget::{column, container, text, Scrollable, Text},
     Application, Command, Settings, Subscription, Theme,
 };
 
@@ -105,7 +105,9 @@ impl Application for App {
                 });
             }
             Message::Msr(msr) => {
-                self.state.cpu_temp_graph.modify_graph(msr.temperature as f64);
+                self.state
+                    .cpu_temp_graph
+                    .modify_graph(msr.temperature as f64);
                 self.state.cpu_pwr_graph.modify_graph(msr.package_power);
                 self.msr = msr;
             }
@@ -117,11 +119,11 @@ impl Application for App {
     fn view(&self) -> iced::Element<'_, Self::Message> {
         let cpu = self.generate_cpu();
         let sys = self.generate_sys();
-        let cpu_pwr =self.state.cpu_pwr_graph.into_view();
+        let cpu_pwr = self.state.cpu_pwr_graph.into_view();
         let cpu_temp = self.state.cpu_temp_graph.into_view();
         let content = column![sys, cpu, cpu_pwr, cpu_temp].spacing(50);
-
-        container(content).padding(10).into()
+        let scrol = Scrollable::new(content);
+        container(scrol).padding(10).into()
     }
 
     fn theme(&self) -> iced::Theme {

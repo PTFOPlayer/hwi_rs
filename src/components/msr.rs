@@ -2,8 +2,8 @@ use std::time::{Duration, SystemTime};
 
 use crate::misc::prec;
 use crate::{App, Message};
-use iced::widget::Text;
 use iced::widget::{column, row, text, Column};
+use iced::widget::{Row, Text};
 use iced::Color;
 
 impl App {
@@ -59,16 +59,30 @@ impl App {
                 cache_section.push(row![c.0.clone(), c.1.clone()].padding(5).spacing(10));
         }
 
+        let len = data.per_core_freq.len() as u64;
+        let mut freq_section: Row<'a, Message> = row![].spacing(20);
+        let mut id = 0u64;
+        let mut freq = 0u64;
+
+        while id < len {
+            let mut col: Column<'a, Message> = column![].spacing(6);
+            for _ in 0..6 {
+                if id >= len {
+                    break;
+                }
+                freq += data.per_core_freq[id as usize];
+                col = col.push(text(format!("core {}: {}", id, data.per_core_freq[id as usize])).size(16));
+                id += 1;
+            }
+            freq_section = freq_section.push(col);
+        }
+        freq = freq / len;
+
         let mut temp_txt = text(format!(
             "Temperature: {:>7}°C",
             prec(data.temperature as f64)
         ))
         .size(20);
-
-        let freq = {
-            let len = data.per_core_freq.len() as u64;
-            data.per_core_freq.iter().sum::<u64>() / len
-        };
 
         let avg_freq: Text<'a> = text(format!("Avg Frequency: {}", freq)).size(20);
         if data.temperature > 50. {
@@ -88,7 +102,11 @@ impl App {
         let col3 = column![text(""), avg_freq];
         let row = row![col1, col2, col3].spacing(35);
 
-        return column![self.static_elements.cpu_title.clone(), row, cache_section];
+        return column![
+            self.static_elements.cpu_title.clone(),
+            row,
+            row![cache_section, freq_section].spacing(10)
+        ];
     }
 
     pub fn generate_sys<'a>(&self) -> Column<'a, Message> {

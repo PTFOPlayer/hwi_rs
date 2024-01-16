@@ -1,15 +1,18 @@
 use std::rc::Rc;
 
 use iced::{
-    widget::{text, Column, Text},
+    widget::{text, Column},
     Renderer, Theme,
 };
-use plotters::{series::LineSeries, style};
+use plotters::{
+    series::LineSeries,
+    style::{self, IntoTextStyle},
+};
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::Message;
 
-#[derive( Clone)]
+#[derive(Clone)]
 pub struct Graph {
     state: [(u32, f64); 50],
     max_value: f64,
@@ -25,7 +28,7 @@ impl Graph {
         Graph {
             state,
             max_value,
-            name: "".into(),
+            name: name.into(),
         }
     }
 
@@ -51,12 +54,20 @@ impl Chart<Message> for Graph {
     fn build_chart<DB: DrawingBackend>(&self, _: &Self::State, mut builder: ChartBuilder<DB>) {
         let mut chart = builder
             .margin(5)
+            .set_left_and_bottom_label_area_size(60)
             .build_cartesian_2d(0u32..50u32, 0f64..self.max_value)
             .unwrap();
-        chart.configure_mesh().draw().unwrap();
-
+        chart
+            .configure_mesh()
+            .axis_style(style::RED)
+            .bold_line_style(style::full_palette::GREY_A400)
+            .label_style(("Calibri", 12, style::FontStyle::Normal).with_color(style::WHITE))
+            .draw()
+            .unwrap();
+        chart.configure_series_labels().draw().unwrap();
         chart
             .draw_series(LineSeries::new(self.state.into_iter(), style::CYAN))
-            .unwrap();
+            .unwrap()
+            .label("lorem ipsum");
     }
 }
