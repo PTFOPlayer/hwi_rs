@@ -14,7 +14,7 @@ use std::process::Command as sysCommand;
 // use main_data::{get_data, MsrData};
 use iced::{
     executor,
-    widget::{column, container, text, Scrollable, Text},
+    widget::{column, container, text, Checkbox, Scrollable, Text},
     Application, Command, Settings, Subscription, Theme,
 };
 
@@ -62,6 +62,9 @@ enum Message {
         sys: Result<SystemInfo, AppError>,
     },
     Fail(AppError),
+    CheckboxMsg {
+        state: bool,
+    },
 }
 
 impl Application for App {
@@ -105,23 +108,36 @@ impl Application for App {
                 });
             }
             Message::Msr(msr) => {
-                self.state
-                    .cpu_temp_graph
-                    .modify_graph(msr.temperature as f64);
-                self.state.cpu_pwr_graph.modify_graph(msr.package_power);
+                if self.state.graphs_switch {
+                    self.state
+                        .cpu_temp_graph
+                        .modify_graph(msr.temperature as f64);
+                    self.state.cpu_pwr_graph.modify_graph(msr.package_power);
+                    self.state.cpu_usage_graph.modify_graph(msr.util);
+                }
                 self.msr = msr;
             }
             Message::Fail(fail) => self.state.fails.msr_fail = Some(fail),
+            Message::CheckboxMsg { state } => {
+                self.state.graphs_switch = state;
+            }
         }
         Command::none()
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
+        let button = Checkbox::new("graphs switch", self.state.graphs_switch, |x| {
+            Message::CheckboxMsg { state: x }
+        });
         let cpu = self.generate_cpu();
         let sys = self.generate_sys();
-        let cpu_pwr = self.state.cpu_pwr_graph.into_view();
-        let cpu_temp = self.state.cpu_temp_graph.into_view();
-        let content = column![sys, cpu, cpu_pwr, cpu_temp].spacing(50);
+        let mut content = column![button, sys, cpu].spacing(50);
+        if self.state.graphs_switch {
+            let cpu_pwr = self.state.cpu_pwr_graph.into_view();
+            let cpu_temp = self.state.cpu_temp_graph.into_view();
+            let cpu_usage = self.state.cpu_usage_graph.into_view();
+            content = content.push(cpu_pwr).push(cpu_temp).push(cpu_usage);
+        }
         let scrol = Scrollable::new(content);
         container(scrol).padding(10).into()
     }
