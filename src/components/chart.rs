@@ -14,14 +14,14 @@ use crate::Message;
 
 #[derive(Clone)]
 pub struct Graph {
-    state: [(u32, f64); 50],
-    max_value: f64,
+    state: [(u32, f32); 50],
+    max_value: f32,
     name: Rc<str>,
 }
 
 impl Graph {
-    pub fn new(max_value: f64, name: &str) -> Graph {
-        let mut state: [(u32, f64); 50] = [(0u32, 0f64); 50];
+    pub fn new(max_value: f32, name: &str) -> Graph {
+        let mut state: [(u32, f32); 50] = [(0u32, 0f32); 50];
         for i in 0..50 {
             state[i].0 = i as u32;
         }
@@ -32,7 +32,7 @@ impl Graph {
         }
     }
 
-    pub fn modify_graph(&mut self, entry: f64) {
+    pub fn modify_graph(&mut self, entry: f32) {
         for i in 0..49 {
             self.state[i] = self.state[i + 1];
             self.state[i].0 -= 1;
@@ -55,7 +55,7 @@ impl Chart<Message> for Graph {
         let mut chart = builder
             .margin(5)
             .set_left_and_bottom_label_area_size(60)
-            .build_cartesian_2d(0u32..50u32, 0f64..self.max_value)
+            .build_cartesian_2d(0u32..50u32, 0f32..self.max_value)
             .unwrap();
         chart
             .configure_mesh()

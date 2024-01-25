@@ -15,9 +15,9 @@ impl Default for State {
             fails: Fails::default(),
             gpu: GpuState::None,
             graphs_switch: false,
-            cpu_pwr_graph: Graph::new(50f64, "Cpu Power (W)"),
-            cpu_temp_graph: Graph::new(100f64, "Cpu Temperature (°C)"),
-            cpu_usage_graph: Graph::new(100f64, "Cpu Usage (%)"),
+            cpu_pwr_graph: Graph::new(50f32, "Cpu Power (W)"),
+            cpu_temp_graph: Graph::new(100f32, "Cpu Temperature (°C)"),
+            cpu_usage_graph: Graph::new(100f32, "Cpu Usage (%)"),
         }
     }
 }

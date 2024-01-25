@@ -11,7 +11,6 @@ use std::time::Duration;
 
 use std::process::Command as sysCommand;
 
-// use main_data::{get_data, MsrData};
 use iced::{
     executor,
     widget::{column, container, text, Checkbox, Scrollable, Text},
@@ -109,11 +108,11 @@ impl Application for App {
             }
             Message::Msr(msr) => {
                 if self.state.graphs_switch {
+                    self.state.cpu_temp_graph.modify_graph(msr.temperature);
                     self.state
-                        .cpu_temp_graph
-                        .modify_graph(msr.temperature as f64);
-                    self.state.cpu_pwr_graph.modify_graph(msr.package_power);
-                    self.state.cpu_usage_graph.modify_graph(msr.util);
+                        .cpu_pwr_graph
+                        .modify_graph(msr.package_power as f32);
+                    self.state.cpu_usage_graph.modify_graph(msr.util as f32);
                 }
                 self.msr = msr;
             }
