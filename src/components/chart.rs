@@ -37,14 +37,15 @@ impl Graph {
             self.state[i] = self.state[i + 1];
             self.state[i].0 -= 1;
         }
-        self.state[49] = (50, entry);
+        self.state[49] = (49, entry);
     }
 
     pub fn into_view<'a>(&self) -> Column<'a, Message, Renderer<Theme>> {
+        let chart = ChartWidget::new(self.clone()).height(iced::Length::Fixed(250.)).width(750.into());
         Column::new()
             .spacing(10)
             .push(text(self.name.clone()))
-            .push(ChartWidget::new(self.clone()).height(iced::Length::Fixed(250.)))
+            .push(chart)
     }
 }
 

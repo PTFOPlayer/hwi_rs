@@ -13,8 +13,8 @@ use std::process::Command as sysCommand;
 
 use iced::{
     executor,
-    widget::{column, container, text, Checkbox, Scrollable, Text},
-    Application, Command, Settings, Subscription, Theme,
+    widget::{checkbox, column, container, row, text, text_input, Scrollable, Text},
+    Application, Command, Length, Settings, Subscription, Theme,
 };
 
 fn main() {
@@ -64,6 +64,7 @@ enum Message {
     CheckboxMsg {
         state: bool,
     },
+    Url(String),
 }
 
 impl Application for App {
@@ -120,25 +121,44 @@ impl Application for App {
             Message::CheckboxMsg { state } => {
                 self.state.graphs_switch = state;
             }
+            Message::Url(url) => {
+                self.url = url;
+            }
         }
         Command::none()
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
-        let button = Checkbox::new("graphs switch", self.state.graphs_switch, |x| {
+        let button = checkbox("graphs switch", self.state.graphs_switch, |x| {
             Message::CheckboxMsg { state: x }
         });
+        let url_input = text_input(&self.url, &self.url).on_input(|url| Message::Url(url));
+
+        let misc_row = row![button, url_input].padding(20).spacing(20);
+
         let cpu = self.generate_cpu();
         let sys = self.generate_sys();
-        let mut content = column![button, sys, cpu].spacing(50);
+        let content = column![sys, cpu].spacing(50);
+        let mut graphs = column![].spacing(50);
+
         if self.state.graphs_switch {
             let cpu_pwr = self.state.cpu_pwr_graph.into_view();
             let cpu_temp = self.state.cpu_temp_graph.into_view();
             let cpu_usage = self.state.cpu_usage_graph.into_view();
-            content = content.push(cpu_pwr).push(cpu_temp).push(cpu_usage);
+            graphs = graphs.push(cpu_pwr).push(cpu_temp).push(cpu_usage);
         }
-        let scrol = Scrollable::new(content);
-        container(scrol).padding(10).into()
+
+        let data_row = row![content, graphs]
+            .width(Length::Fill)
+            .padding(20)
+            .spacing(100);
+        let scrol =
+            Scrollable::new(column![misc_row, data_row].width(Length::Fill)).width(Length::Fill);
+
+        container(scrol)
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .into()
     }
 
     fn theme(&self) -> iced::Theme {
