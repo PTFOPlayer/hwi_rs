@@ -71,7 +71,9 @@ impl App {
                     break;
                 }
                 freq += data.per_core_freq[id as usize];
-                col = col.push(text(format!("core {}: {}", id, data.per_core_freq[id as usize])).size(16));
+                col = col.push(
+                    text(format!("core {}: {}", id, data.per_core_freq[id as usize])).size(16),
+                );
                 id += 1;
             }
             freq_section = freq_section.push(col);

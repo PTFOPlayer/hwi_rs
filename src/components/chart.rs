@@ -10,7 +10,7 @@ use plotters::{
 };
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
-use crate::Message;
+pub use crate::Message;
 
 #[derive(Clone)]
 pub struct Graph {
@@ -33,6 +33,9 @@ impl Graph {
     }
 
     pub fn modify_graph(&mut self, entry: f32) {
+        if entry > self.max_value {
+            self.max_value = entry;
+        }
         for i in 0..49 {
             self.state[i] = self.state[i + 1];
             self.state[i].0 -= 1;
@@ -40,8 +43,10 @@ impl Graph {
         self.state[49] = (49, entry);
     }
 
-    pub fn into_view<'a>(&self) -> Column<'a, Message, Renderer<Theme>> {
-        let chart = ChartWidget::new(self.clone()).height(iced::Length::Fixed(250.)).width(750.into());
+    pub fn into_view(&self) -> Column<'static, Message, Renderer<Theme>> {
+        let chart = ChartWidget::new(self.clone())
+            .height(iced::Length::Fixed(250.))
+            .width(750.into());
         Column::new()
             .spacing(10)
             .push(text(self.name.clone()))

@@ -7,6 +7,7 @@ pub struct State {
     pub cpu_pwr_graph: Graph,
     pub cpu_temp_graph: Graph,
     pub cpu_usage_graph: Graph,
+    pub cpu_avg_freq_graph: Graph,
 }
 
 impl Default for State {
@@ -18,6 +19,7 @@ impl Default for State {
             cpu_pwr_graph: Graph::new(50f32, "Cpu Power (W)"),
             cpu_temp_graph: Graph::new(100f32, "Cpu Temperature (°C)"),
             cpu_usage_graph: Graph::new(100f32, "Cpu Usage (%)"),
+            cpu_avg_freq_graph: Graph::new(2500f32, "Cpu avarage frequency (MHz)"),
         }
     }
 }
@@ -32,5 +34,4 @@ pub enum GpuState {
     None,
     Radeon,
     Nvidia,
-    Intel,
 }

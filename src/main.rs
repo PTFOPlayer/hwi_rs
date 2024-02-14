@@ -13,8 +13,12 @@ use std::process::Command as sysCommand;
 
 use iced::{
     executor,
-    widget::{checkbox, column, container, row, text, text_input, Scrollable, Text},
-    Application, Command, Length, Settings, Subscription, Theme,
+    widget::{
+        checkbox, column, container, row,
+        scrollable::{Direction, Properties},
+        text, text_input, Scrollable, Text,
+    },
+    Application, Command, Length, Pixels, Settings, Subscription, Theme,
 };
 
 fn main() {
@@ -53,7 +57,7 @@ struct App {
 }
 
 #[derive(Debug, Clone)]
-enum Message {
+pub enum Message {
     Tick,
     Msr(MsrData),
     Prep {
@@ -108,12 +112,16 @@ impl Application for App {
                 });
             }
             Message::Msr(msr) => {
-                if self.state.graphs_switch {
-                    self.state.cpu_temp_graph.modify_graph(msr.temperature);
-                    self.state
-                        .cpu_pwr_graph
-                        .modify_graph(msr.package_power as f32);
-                    self.state.cpu_usage_graph.modify_graph(msr.util as f32);
+                let state = &mut self.state;
+                if state.graphs_switch {
+                    state.cpu_temp_graph.modify_graph(msr.temperature);
+                    state.cpu_pwr_graph.modify_graph(msr.package_power as f32);
+                    state.cpu_usage_graph.modify_graph(msr.util as f32);
+                    // unsafe cast, i dont like it
+                    state.cpu_avg_freq_graph.modify_graph(
+                        (msr.per_core_freq.iter().sum::<u64>() / msr.per_core_freq.len() as u64)
+                            as f32,
+                    );
                 }
                 self.msr = msr;
             }
@@ -136,29 +144,23 @@ impl Application for App {
 
         let misc_row = row![button, url_input].padding(20).spacing(20);
 
-        let cpu = self.generate_cpu();
-        let sys = self.generate_sys();
-        let content = column![sys, cpu].spacing(50);
-        let mut graphs = column![].spacing(50);
+        let content = column![self.generate_sys(), self.generate_cpu()].spacing(50);
 
+        let mut graphs = column![].spacing(50);
         if self.state.graphs_switch {
-            let cpu_pwr = self.state.cpu_pwr_graph.into_view();
-            let cpu_temp = self.state.cpu_temp_graph.into_view();
-            let cpu_usage = self.state.cpu_usage_graph.into_view();
-            graphs = graphs.push(cpu_pwr).push(cpu_temp).push(cpu_usage);
+            graphs = graphs
+                .push(text("Cpu Graphs"))
+                .push(self.state.cpu_pwr_graph.into_view())
+                .push(self.state.cpu_temp_graph.into_view())
+                .push(self.state.cpu_usage_graph.into_view())
+                .push(self.state.cpu_avg_freq_graph.into_view());
         }
 
-        let data_row = row![content, graphs]
-            .width(Length::Fill)
-            .padding(20)
-            .spacing(100);
-        let scrol =
-            Scrollable::new(column![misc_row, data_row].width(Length::Fill)).width(Length::Fill);
+        let data_row = row![content, graphs].padding(20).spacing(100);
 
-        container(scrol)
-            .width(Length::Fill)
-            .height(Length::Fill)
-            .into()
+        let scrol = Scrollable::new(column![misc_row, data_row]);
+
+        container(scrol).into()
     }
 
     fn theme(&self) -> iced::Theme {
@@ -176,7 +178,6 @@ impl Application for App {
         match self.state.gpu {
             GpuState::Nvidia => {}
             GpuState::Radeon => {}
-            GpuState::Intel => {}
             _ => {}
         };
         Subscription::batch(subs)
