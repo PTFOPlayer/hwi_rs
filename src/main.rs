@@ -11,11 +11,14 @@ use std::time::Duration;
 
 use std::process::Command as sysCommand;
 
-// use main_data::{get_data, MsrData};
 use iced::{
     executor,
-    widget::{column, container, text, Scrollable, Text},
-    Application, Command, Settings, Subscription, Theme,
+    widget::{
+        checkbox, column, container, row,
+        scrollable::{Direction, Properties},
+        text, text_input, Scrollable, Text,
+    },
+    Application, Command, Length, Pixels, Settings, Subscription, Theme,
 };
 
 fn main() {
@@ -54,7 +57,7 @@ struct App {
 }
 
 #[derive(Debug, Clone)]
-enum Message {
+pub enum Message {
     Tick,
     Msr(MsrData),
     Prep {
@@ -62,6 +65,10 @@ enum Message {
         sys: Result<SystemInfo, AppError>,
     },
     Fail(AppError),
+    CheckboxMsg {
+        state: bool,
+    },
+    Url(String),
 }
 
 impl Application for App {
@@ -105,25 +112,55 @@ impl Application for App {
                 });
             }
             Message::Msr(msr) => {
-                self.state
-                    .cpu_temp_graph
-                    .modify_graph(msr.temperature as f64);
-                self.state.cpu_pwr_graph.modify_graph(msr.package_power);
+                let state = &mut self.state;
+                if state.graphs_switch {
+                    state.cpu_temp_graph.modify_graph(msr.temperature);
+                    state.cpu_pwr_graph.modify_graph(msr.package_power as f32);
+                    state.cpu_usage_graph.modify_graph(msr.util as f32);
+                    // unsafe cast, i dont like it
+                    state.cpu_avg_freq_graph.modify_graph(
+                        (msr.per_core_freq.iter().sum::<u64>() / msr.per_core_freq.len() as u64)
+                            as f32,
+                    );
+                }
                 self.msr = msr;
             }
             Message::Fail(fail) => self.state.fails.msr_fail = Some(fail),
+            Message::CheckboxMsg { state } => {
+                self.state.graphs_switch = state;
+            }
+            Message::Url(url) => {
+                self.url = url;
+            }
         }
         Command::none()
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
-        let cpu = self.generate_cpu();
-        let sys = self.generate_sys();
-        let cpu_pwr = self.state.cpu_pwr_graph.into_view();
-        let cpu_temp = self.state.cpu_temp_graph.into_view();
-        let content = column![sys, cpu, cpu_pwr, cpu_temp].spacing(50);
-        let scrol = Scrollable::new(content);
-        container(scrol).padding(10).into()
+        let button = checkbox("graphs switch", self.state.graphs_switch, |x| {
+            Message::CheckboxMsg { state: x }
+        });
+        let url_input = text_input(&self.url, &self.url).on_input(|url| Message::Url(url));
+
+        let misc_row = row![button, url_input].padding(20).spacing(20);
+
+        let content = column![self.generate_sys(), self.generate_cpu()].spacing(50);
+
+        let mut graphs = column![].spacing(50);
+        if self.state.graphs_switch {
+            graphs = graphs
+                .push(text("Cpu Graphs"))
+                .push(self.state.cpu_pwr_graph.into_view())
+                .push(self.state.cpu_temp_graph.into_view())
+                .push(self.state.cpu_usage_graph.into_view())
+                .push(self.state.cpu_avg_freq_graph.into_view());
+        }
+
+        let data_row = row![content, graphs].padding(20).spacing(100);
+
+        let scrol = Scrollable::new(column![misc_row, data_row]);
+
+        container(scrol).into()
     }
 
     fn theme(&self) -> iced::Theme {
@@ -141,7 +178,6 @@ impl Application for App {
         match self.state.gpu {
             GpuState::Nvidia => {}
             GpuState::Radeon => {}
-            GpuState::Intel => {}
             _ => {}
         };
         Subscription::batch(subs)
