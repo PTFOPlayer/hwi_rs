@@ -14,10 +14,10 @@ use std::process::Command as sysCommand;
 use iced::{
     executor,
     widget::{
-        checkbox, column, container, horizontal_space, row, scrollable::Properties, space, text,
-        text_input, Scrollable, Text,
+        checkbox, column, container, row, scrollable::Properties, text, text_input, Column,
+        Scrollable, Text,
     },
-    Alignment, Application, Command, Length, Settings, Subscription, Theme,
+    Application, Command, Settings, Subscription, Theme,
 };
 
 fn main() {
@@ -68,6 +68,7 @@ pub enum Message {
         state: bool,
     },
     Url(String),
+    Resize(u16),
 }
 
 impl Application for App {
@@ -116,7 +117,6 @@ impl Application for App {
                     state.cpu_temp_graph.modify_graph(msr.temperature);
                     state.cpu_pwr_graph.modify_graph(msr.package_power as f32);
                     state.cpu_usage_graph.modify_graph(msr.util as f32);
-                    // unsafe cast, i dont like it
                     state.cpu_avg_freq_graph.modify_graph(
                         (msr.per_core_freq.iter().sum::<u64>() / msr.per_core_freq.len() as u64)
                             as f32,
@@ -131,6 +131,7 @@ impl Application for App {
             Message::Url(url) => {
                 self.url = url;
             }
+            Message::Resize(x) => {}
         }
         Command::none()
     }
@@ -141,10 +142,14 @@ impl Application for App {
         let url_input = text_input(&self.url, &self.url)
             .on_input(|url| Message::Url(url))
             .width(350.);
-
+        
         let misc_row = row![button, url_input].padding(20).spacing(20);
 
-        let content = column![self.generate_sys(), self.generate_cpu()].spacing(50);
+        let content = Column::new()
+            .push(self.generate_sys())
+            .push(self.generate_cpu())
+            .push_maybe(self.generate_radeon().ok())
+            .spacing(50);
 
         let mut graphs = column![].spacing(50);
         if self.state.graphs_switch {
@@ -154,14 +159,21 @@ impl Application for App {
                 .push(self.state.cpu_usage_graph.into_view())
                 .push(self.state.cpu_avg_freq_graph.into_view());
         }
+        // will be introduced when iced_aw moves to iced 0.12.0
+        // let data_row: Split<'_, Message, iced::Renderer> = Split::new(
+        //     container(content).into(),
+        //     container(graphs).into(),
+        //     None,
+        //     iced_aw::split::Axis::Vertical,
+        //     Message::Resize,
+        // );
 
         let data_row = Scrollable::new(container(row![content, graphs].padding(20).spacing(100)))
             .direction(iced::widget::scrollable::Direction::Both {
                 vertical: Properties::new(),
                 horizontal: Properties::new(),
             });
-
-        let scrol = column![misc_row, data_row];
+        let scrol = column![misc_row, data_row, ];
 
         scrol.into()
     }
@@ -191,7 +203,7 @@ impl Default for App {
     fn default() -> Self {
         Self {
             state: State::default(),
-            url: "http://localhost:8000".to_string(),
+            url: "http://localhost:7172".to_string(),
             msr: MsrData::default(),
             sys: SystemInfo::default(),
             static_elements: StaticElements::default(),

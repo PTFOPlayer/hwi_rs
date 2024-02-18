@@ -99,9 +99,17 @@ impl App {
         let volt: Text<'a> = text(format!("Power: {: >7}W", prec(data.package_power))).size(20);
         let pwr: Text<'a> = text(format!("Voltage: {: >7}V", prec(data.voltage))).size(20);
 
-        let col1 = column![self.static_elements.cores_threads.0.clone(), temp_txt, volt];
-        let col2 = column![self.static_elements.cores_threads.1.clone(), usage_txt, pwr];
-        let col3 = column![text(""), avg_freq];
+        let col1 = Column::new()
+            .spacing(10)
+            .push(self.static_elements.cores_threads.0.clone())
+            .push(temp_txt)
+            .push(volt);
+        let col2 = Column::new()
+            .spacing(10)
+            .push(self.static_elements.cores_threads.1.clone())
+            .push(usage_txt)
+            .push(pwr);
+        let col3 = Column::new().spacing(10).push(text("")).push(avg_freq);
         let row = row![col1, col2, col3].spacing(35);
 
         return column![
