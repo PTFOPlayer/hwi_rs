@@ -5,8 +5,8 @@ edition = "2021"
 
 
 [dependencies]
-iced = { version = "0.10.0", features = ["tokio", "wgpu"] }
-plotters-iced = "0.9.0"
+iced = { version = "0.12.0", features = ["tokio", "wgpu"] }
+plotters-iced = "0.10.0"
 plotters = { version = "0.3" }
 
 lazy_static = "1.4.0"

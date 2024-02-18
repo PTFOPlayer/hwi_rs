@@ -1,9 +1,6 @@
 use std::rc::Rc;
 
-use iced::{
-    widget::{text, Column},
-    Renderer, Theme,
-};
+use iced::widget::{text, Column};
 use plotters::{
     series::LineSeries,
     style::{self, IntoTextStyle},
@@ -43,10 +40,11 @@ impl Graph {
         self.state[49] = (49, entry);
     }
 
-    pub fn into_view(&self) -> Column<'static, Message, Renderer<Theme>> {
+    pub fn into_view(&self) -> Column<'static, Message> {
         let chart = ChartWidget::new(self.clone())
-            .height(iced::Length::Fixed(250.))
+            .height(250.into())
             .width(750.into());
+
         Column::new()
             .spacing(10)
             .push(text(self.name.clone()))

@@ -26,7 +26,7 @@ impl App {
 
         let mut cache_vec = vec![];
         for c in &data.cache {
-            let title = format!("Cache L{} {}: ", c.level, c.cache_type);
+            let title = format!("Cache L{} {:13}", c.level, c.cache_type);
             let title: Text<'static> = text(title).size(21).style(Color::new(0.3, 0.8, 0.3, 1.0));
             let c_data = format!("{} kB", c.size as f64 / 1024.);
             let c_data: Text<'static> = text(c_data).size(21);
@@ -35,8 +35,8 @@ impl App {
         self.static_elements.cpu_cache = cache_vec;
 
         self.static_elements.cores_threads = (
-            text(format!("Cores: {}", data.cores)).size(20),
-            text(format!("Threads: {}", data.threads)).size(20),
+            text(format!("Cores: {:4}", data.cores)).size(20),
+            text(format!("Threads: {:4}", data.threads)).size(20),
         );
     }
 
@@ -81,23 +81,23 @@ impl App {
         freq = freq / len;
 
         let mut temp_txt = text(format!(
-            "Temperature: {:>7}°C",
+            "Temperature: {: >7}°C",
             prec(data.temperature as f64)
         ))
         .size(20);
 
-        let avg_freq: Text<'a> = text(format!("Avg Frequency: {}", freq)).size(20);
+        let avg_freq: Text<'a> = text(format!("Avg Frequency: {: >7}", freq)).size(20);
         if data.temperature > 50. {
             temp_txt = temp_txt.style(Color::new(1., 0., 0., 1.));
         };
 
-        let mut usage_txt: Text<'a> = text(format!("Util: {:>7}%", prec(data.util))).size(20);
+        let mut usage_txt: Text<'a> = text(format!("Util: {: >7}%", prec(data.util))).size(20);
         if data.util > 50. {
             usage_txt = usage_txt.style(Color::new(1., 0.1, 0.5, 1.));
         };
 
-        let volt: Text<'a> = text(format!("Power: {:>7}W", prec(data.package_power))).size(20);
-        let pwr: Text<'a> = text(format!("Voltage: {:>7}V", prec(data.voltage))).size(20);
+        let volt: Text<'a> = text(format!("Power: {: >7}W", prec(data.package_power))).size(20);
+        let pwr: Text<'a> = text(format!("Voltage: {: >7}V", prec(data.voltage))).size(20);
 
         let col1 = column![self.static_elements.cores_threads.0.clone(), temp_txt, volt];
         let col2 = column![self.static_elements.cores_threads.1.clone(), usage_txt, pwr];
