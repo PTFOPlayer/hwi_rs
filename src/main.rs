@@ -14,10 +14,10 @@ use std::process::Command as sysCommand;
 use iced::{
     executor,
     widget::{
-        checkbox, column, container, row, scrollable::Properties, text, text_input, Column,
-        Scrollable, Text,
+        checkbox, column, container, row, scrollable::Properties, space, text, text_input, Column,
+        Scrollable, Space, Text,
     },
-    Application, Command, Settings, Subscription, Theme,
+    Application, Command, Length, Settings, Subscription, Theme,
 };
 
 fn main() {
@@ -104,6 +104,12 @@ impl Application for App {
                     Err(err) => self.state.fails.sys_fail = Some(err),
                 }
                 self.generate_static_cpu();
+
+                if self.generate_radeon().is_err() {
+                    self.state.gpu = GpuState::None
+                } else {
+                    self.state.gpu = GpuState::Radeon
+                }
             }
             Message::Tick => {
                 return Command::perform(get_data(self.url.clone()), |x| match x {
@@ -142,13 +148,17 @@ impl Application for App {
         let url_input = text_input(&self.url, &self.url)
             .on_input(|url| Message::Url(url))
             .width(350.);
-        
+
         let misc_row = row![button, url_input].padding(20).spacing(20);
 
         let content = Column::new()
             .push(self.generate_sys())
             .push(self.generate_cpu())
-            .push_maybe(self.generate_radeon().ok())
+            .push(match self.state.gpu {
+                GpuState::None => column![].into(),
+                GpuState::Radeon => self.generate_radeon().unwrap_or(column![].into()),
+                GpuState::Nvidia => column![].into(),
+            })
             .spacing(50);
 
         let mut graphs = column![].spacing(50);
@@ -160,22 +170,22 @@ impl Application for App {
                 .push(self.state.cpu_avg_freq_graph.into_view());
         }
         // will be introduced when iced_aw moves to iced 0.12.0
-        // let data_row: Split<'_, Message, iced::Renderer> = Split::new(
-        //     container(content).into(),
-        //     container(graphs).into(),
-        //     None,
-        //     iced_aw::split::Axis::Vertical,
-        //     Message::Resize,
+        // let data_row = iced_aw::Split::new(
+        // container(content).into(),
+        // container(graphs).into(),
+        // None,
+        // iced_aw::split::Axis::Vertical,
+        // Message::Resize,
         // );
-
-        let data_row = Scrollable::new(container(row![content, graphs].padding(20).spacing(100)))
+        let scroll = Scrollable::new(container(row![content, graphs].padding(20).spacing(100)))
             .direction(iced::widget::scrollable::Direction::Both {
                 vertical: Properties::new(),
                 horizontal: Properties::new(),
             });
-        let scrol = column![misc_row, data_row, ];
 
-        scrol.into()
+        let final_element = column![misc_row, scroll].width(Length::Fill);
+
+        final_element.into()
     }
 
     fn theme(&self) -> iced::Theme {

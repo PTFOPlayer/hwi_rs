@@ -40,15 +40,16 @@ impl App {
         );
     }
 
-    pub fn generate_cpu<'a>(&self) -> Column<'a, Message> {
+    pub fn generate_cpu<'a>(&self) -> iced::Element<'a, <App as iced::Application>::Message> {
         let data = &self.msr;
 
         match &self.state.fails.msr_fail {
             Some(err) => {
-                return column![row![text(format!(
+                return text(format!(
                     "occured error while requesting MSR(cpu): {:?}",
                     err
-                ))]]
+                ))
+                .into()
             }
             None => {}
         };
@@ -112,21 +113,22 @@ impl App {
         let col3 = Column::new().spacing(10).push(text("")).push(avg_freq);
         let row = row![col1, col2, col3].spacing(35);
 
-        return column![
-            self.static_elements.cpu_title.clone(),
-            row,
-            row![cache_section, freq_section].spacing(10)
-        ];
+        Column::new()
+            .push(self.static_elements.cpu_title.clone())
+            .push(row)
+            .push(row![cache_section, freq_section].spacing(10))
+            .into()
     }
 
-    pub fn generate_sys<'a>(&self) -> Column<'a, Message> {
+    pub fn generate_sys<'a>(&self) -> iced::Element<'a, <App as iced::Application>::Message> {
         let sys = &self.sys;
         match &self.state.fails.sys_fail {
             Some(err) => {
-                return column![row![text(format!(
+                return text(format!(
                     "occured error while requesting MSR(sys): {:?}",
                     err
-                ))]]
+                ))
+                .into()
             }
             None => {}
         };
@@ -148,6 +150,7 @@ impl App {
         let os_version = text(sys.os_version.clone()).size(20);
 
         let row = row![kernel, os_version].spacing(35);
-        return column![title, since_boot, row];
+
+        Column::new().push(title).push(since_boot).push(row).into()
     }
 }
