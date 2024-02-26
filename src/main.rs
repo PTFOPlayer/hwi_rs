@@ -13,10 +13,7 @@ use std::process::Command as sysCommand;
 
 use iced::{
     executor,
-    widget::{
-        checkbox, column, container, row, scrollable::Properties, space, text, text_input, Column,
-        Scrollable, Space, Text,
-    },
+    widget::{button, checkbox, column, row, text, text_input, Column, Scrollable, Space, Text},
     Application, Command, Length, Settings, Subscription, Theme,
 };
 
@@ -53,6 +50,9 @@ struct App {
     msr: MsrData,
     sys: SystemInfo,
     static_elements: StaticElements<'static>,
+    divider: Option<u16>,
+    split_axis: iced_aw::split::Axis,
+    axis_state: bool
 }
 
 #[derive(Debug, Clone)]
@@ -67,6 +67,7 @@ pub enum Message {
     CheckboxMsg {
         state: bool,
     },
+    SplitSwitch,
     Url(String),
     Resize(u16),
 }
@@ -137,19 +138,31 @@ impl Application for App {
             Message::Url(url) => {
                 self.url = url;
             }
-            Message::Resize(x) => {}
+            Message::Resize(x) => self.divider = Some(x),
+            Message::SplitSwitch => {
+                if  self.axis_state{
+                    self.axis_state = false;
+                    self.split_axis = iced_aw::split::Axis::Horizontal
+                } else {
+                    self.axis_state = true;
+                    self.split_axis = iced_aw::split::Axis::Vertical
+                }
+
+            }
         }
         Command::none()
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
-        let button = checkbox("graphs switch", self.state.graphs_switch)
+        let graphs_switch = checkbox("graphs switch", self.state.graphs_switch)
             .on_toggle(|x| Message::CheckboxMsg { state: x });
+
+        let split_switch = button("toggle axis").on_press(Message::SplitSwitch);
         let url_input = text_input(&self.url, &self.url)
             .on_input(|url| Message::Url(url))
             .width(350.);
 
-        let misc_row = row![button, url_input].padding(20).spacing(20);
+        let misc_row = row![graphs_switch, split_switch, url_input].padding(20).spacing(20);
 
         let content = Column::new()
             .push(self.generate_sys())
@@ -162,6 +175,7 @@ impl Application for App {
             .spacing(50);
 
         let mut graphs = column![].spacing(50);
+
         if self.state.graphs_switch {
             graphs = graphs
                 .push(self.state.cpu_pwr_graph.into_view())
@@ -169,19 +183,14 @@ impl Application for App {
                 .push(self.state.cpu_usage_graph.into_view())
                 .push(self.state.cpu_avg_freq_graph.into_view());
         }
-        // will be introduced when iced_aw moves to iced 0.12.0
-        // let data_row = iced_aw::Split::new(
-        // container(content).into(),
-        // container(graphs).into(),
-        // None,
-        // iced_aw::split::Axis::Vertical,
-        // Message::Resize,
-        // );
-        let scroll = Scrollable::new(container(row![content, graphs].padding(20).spacing(100)))
-            .direction(iced::widget::scrollable::Direction::Both {
-                vertical: Properties::new(),
-                horizontal: Properties::new(),
-            });
+
+        let scroll = iced_aw::Split::new(
+            Scrollable::new(row![content.padding(20), Space::with_width(Length::Fill)]),
+            Scrollable::new(row![graphs.padding(20), Space::with_width(Length::Fill)]),
+            self.divider,
+            self.split_axis,
+            Message::Resize,
+        );
 
         let final_element = column![misc_row, scroll].width(Length::Fill);
 
@@ -217,6 +226,9 @@ impl Default for App {
             msr: MsrData::default(),
             sys: SystemInfo::default(),
             static_elements: StaticElements::default(),
+            divider: None,
+            split_axis: iced_aw::split::Axis::Vertical,
+            axis_state: true
         }
     }
 }

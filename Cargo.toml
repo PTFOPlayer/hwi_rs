@@ -6,7 +6,7 @@ edition = "2021"
 
 [dependencies]
 iced = { version = "0.12.0", features = ["tokio", "wgpu"] }
-iced_aw = { version = "0.7.0", features = ["split"] }
+iced_aw = { version = "0.8.0", features = ["split", "menu"] }
 plotters-iced = "0.10.0"
 plotters = { version = "0.3" }
 
