@@ -3,7 +3,7 @@ mod misc;
 mod state;
 mod statistics;
 use error::AppError;
-use state::{GpuState, State};
+use state::{AxisState, GpuState, State, StaticElements};
 use statistics::*;
 mod error;
 
@@ -13,7 +13,7 @@ use std::process::Command as sysCommand;
 
 use iced::{
     executor,
-    widget::{button, checkbox, column, row, text, text_input, Column, Scrollable, Space, Text},
+    widget::{button, checkbox, column, row, text_input, Column, Scrollable, Space},
     Application, Command, Length, Settings, Subscription, Theme,
 };
 
@@ -28,31 +28,13 @@ fn main() {
     let _ = App::run(settings);
 }
 
-struct StaticElements<'a> {
-    cpu_title: Text<'a>,
-    cpu_cache: Vec<(Text<'a>, Text<'a>)>,
-    cores_threads: (Text<'a>, Text<'a>),
-}
-
-impl<'a> Default for StaticElements<'a> {
-    fn default() -> Self {
-        Self {
-            cpu_title: text("Unknown"),
-            cpu_cache: vec![],
-            cores_threads: (text(""), text("")),
-        }
-    }
-}
-
 struct App {
     state: State,
     url: String,
     msr: MsrData,
     sys: SystemInfo,
     static_elements: StaticElements<'static>,
-    divider: Option<u16>,
-    split_axis: iced_aw::split::Axis,
-    axis_state: bool
+    axis_state: AxisState,
 }
 
 #[derive(Debug, Clone)]
@@ -138,17 +120,8 @@ impl Application for App {
             Message::Url(url) => {
                 self.url = url;
             }
-            Message::Resize(x) => self.divider = Some(x),
-            Message::SplitSwitch => {
-                if  self.axis_state{
-                    self.axis_state = false;
-                    self.split_axis = iced_aw::split::Axis::Horizontal
-                } else {
-                    self.axis_state = true;
-                    self.split_axis = iced_aw::split::Axis::Vertical
-                }
-
-            }
+            Message::Resize(x) => self.axis_state.set_divider(x),
+            Message::SplitSwitch => self.axis_state.switch(),
         }
         Command::none()
     }
@@ -162,7 +135,9 @@ impl Application for App {
             .on_input(|url| Message::Url(url))
             .width(350.);
 
-        let misc_row = row![graphs_switch, split_switch, url_input].padding(20).spacing(20);
+        let misc_row = row![graphs_switch, split_switch, url_input]
+            .padding(20)
+            .spacing(20);
 
         let content = Column::new()
             .push(self.generate_sys())
@@ -187,8 +162,8 @@ impl Application for App {
         let scroll = iced_aw::Split::new(
             Scrollable::new(row![content.padding(20), Space::with_width(Length::Fill)]),
             Scrollable::new(row![graphs.padding(20), Space::with_width(Length::Fill)]),
-            self.divider,
-            self.split_axis,
+            self.axis_state.divider,
+            self.axis_state.split_axis,
             Message::Resize,
         );
 
@@ -226,9 +201,7 @@ impl Default for App {
             msr: MsrData::default(),
             sys: SystemInfo::default(),
             static_elements: StaticElements::default(),
-            divider: None,
-            split_axis: iced_aw::split::Axis::Vertical,
-            axis_state: true
+            axis_state: AxisState::default(),
         }
     }
 }
