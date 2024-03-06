@@ -5,14 +5,15 @@ edition = "2021"
 
 
 [dependencies]
-iced = { version = "0.10.0", features = ["tokio", "wgpu"] }
-plotters-iced = "0.9.0"
+iced = { version = "0.12.0", features = ["tokio", "wgpu"] }
+iced_aw = { version = "0.8.0", features = ["split", "menu"] }
+plotters-iced = "0.10.0"
 plotters = { version = "0.3" }
 
 lazy_static = "1.4.0"
 
 nvml-wrapper = "0.10.0"
-rocm_smi_lib = { version = "0.1.16", optional = true }
+rocm_smi_lib = { version = "0.1.17", features = ["device"] }
 
 reqwest = { version = "0.11.22", features = ["blocking"] }
 serde = { version = "1.0", features = ["derive"] }

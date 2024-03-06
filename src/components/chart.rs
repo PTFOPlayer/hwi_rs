@@ -1,9 +1,6 @@
 use std::rc::Rc;
 
-use iced::{
-    widget::{text, Column},
-    Renderer, Theme,
-};
+use iced::widget::{text, Column};
 use plotters::{
     series::LineSeries,
     style::{self, IntoTextStyle},
@@ -32,7 +29,7 @@ impl Graph {
         }
     }
 
-    pub fn modify_graph(&mut self, entry: f32) {
+    pub fn update(&mut self, entry: f32) {
         if entry > self.max_value {
             self.max_value = entry;
         }
@@ -43,10 +40,11 @@ impl Graph {
         self.state[49] = (49, entry);
     }
 
-    pub fn into_view(&self) -> Column<'static, Message, Renderer<Theme>> {
+    pub fn into_view(&self) -> Column<'static, Message> {
         let chart = ChartWidget::new(self.clone())
-            .height(iced::Length::Fixed(250.))
+            .height(250.into())
             .width(750.into());
+
         Column::new()
             .spacing(10)
             .push(text(self.name.clone()))
@@ -73,7 +71,6 @@ impl Chart<Message> for Graph {
         chart.configure_series_labels().draw().unwrap();
         chart
             .draw_series(LineSeries::new(self.state.into_iter(), style::CYAN))
-            .unwrap()
-            .label("lorem ipsum");
+            .unwrap();
     }
 }

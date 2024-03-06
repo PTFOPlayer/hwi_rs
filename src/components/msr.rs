@@ -26,7 +26,7 @@ impl App {
 
         let mut cache_vec = vec![];
         for c in &data.cache {
-            let title = format!("Cache L{} {}: ", c.level, c.cache_type);
+            let title = format!("Cache L{} {:13}", c.level, c.cache_type);
             let title: Text<'static> = text(title).size(21).style(Color::new(0.3, 0.8, 0.3, 1.0));
             let c_data = format!("{} kB", c.size as f64 / 1024.);
             let c_data: Text<'static> = text(c_data).size(21);
@@ -35,20 +35,21 @@ impl App {
         self.static_elements.cpu_cache = cache_vec;
 
         self.static_elements.cores_threads = (
-            text(format!("Cores: {}", data.cores)).size(20),
-            text(format!("Threads: {}", data.threads)).size(20),
+            text(format!("Cores: {:4}", data.cores)).size(20),
+            text(format!("Threads: {:4}", data.threads)).size(20),
         );
     }
 
-    pub fn generate_cpu<'a>(&self) -> Column<'a, Message> {
+    pub fn generate_cpu<'a>(&self) -> iced::Element<'a, <App as iced::Application>::Message> {
         let data = &self.msr;
 
         match &self.state.fails.msr_fail {
             Some(err) => {
-                return column![row![text(format!(
+                return text(format!(
                     "occured error while requesting MSR(cpu): {:?}",
                     err
-                ))]]
+                ))
+                .into()
             }
             None => {}
         };
@@ -72,7 +73,7 @@ impl App {
                 }
                 freq += data.per_core_freq[id as usize];
                 col = col.push(
-                    text(format!("core {}: {}", id, data.per_core_freq[id as usize])).size(16),
+                    text(format!("core {}: {}MHz", id, data.per_core_freq[id as usize])).size(16),
                 );
                 id += 1;
             }
@@ -81,44 +82,53 @@ impl App {
         freq = freq / len;
 
         let mut temp_txt = text(format!(
-            "Temperature: {:>7}°C",
+            "Temperature: {: >7}°C",
             prec(data.temperature as f64)
         ))
         .size(20);
 
-        let avg_freq: Text<'a> = text(format!("Avg Frequency: {}", freq)).size(20);
+        let avg_freq: Text<'a> = text(format!("Avg Frequency: {: >7}MHz", freq)).size(20);
         if data.temperature > 50. {
             temp_txt = temp_txt.style(Color::new(1., 0., 0., 1.));
         };
 
-        let mut usage_txt: Text<'a> = text(format!("Util: {:>7}%", prec(data.util))).size(20);
+        let mut usage_txt: Text<'a> = text(format!("Util: {: >7}%", prec(data.util))).size(20);
         if data.util > 50. {
             usage_txt = usage_txt.style(Color::new(1., 0.1, 0.5, 1.));
         };
 
-        let volt: Text<'a> = text(format!("Power: {:>7}W", prec(data.package_power))).size(20);
-        let pwr: Text<'a> = text(format!("Voltage: {:>7}V", prec(data.voltage))).size(20);
+        let volt: Text<'a> = text(format!("Power: {: >7}W", prec(data.package_power))).size(20);
+        let pwr: Text<'a> = text(format!("Voltage: {: >7}V", prec(data.voltage))).size(20);
 
-        let col1 = column![self.static_elements.cores_threads.0.clone(), temp_txt, volt];
-        let col2 = column![self.static_elements.cores_threads.1.clone(), usage_txt, pwr];
-        let col3 = column![text(""), avg_freq];
+        let col1 = Column::new()
+            .spacing(10)
+            .push(self.static_elements.cores_threads.0.clone())
+            .push(temp_txt)
+            .push(volt);
+        let col2 = Column::new()
+            .spacing(10)
+            .push(self.static_elements.cores_threads.1.clone())
+            .push(usage_txt)
+            .push(pwr);
+        let col3 = Column::new().spacing(10).push(text("")).push(avg_freq);
         let row = row![col1, col2, col3].spacing(35);
 
-        return column![
-            self.static_elements.cpu_title.clone(),
-            row,
-            row![cache_section, freq_section].spacing(10)
-        ];
+        Column::new()
+            .push(self.static_elements.cpu_title.clone())
+            .push(row)
+            .push(row![cache_section, freq_section].spacing(10))
+            .into()
     }
 
-    pub fn generate_sys<'a>(&self) -> Column<'a, Message> {
+    pub fn generate_sys<'a>(&self) -> iced::Element<'a, <App as iced::Application>::Message> {
         let sys = &self.sys;
         match &self.state.fails.sys_fail {
             Some(err) => {
-                return column![row![text(format!(
+                return text(format!(
                     "occured error while requesting MSR(sys): {:?}",
                     err
-                ))]]
+                ))
+                .into()
             }
             None => {}
         };
@@ -140,6 +150,7 @@ impl App {
         let os_version = text(sys.os_version.clone()).size(20);
 
         let row = row![kernel, os_version].spacing(35);
-        return column![title, since_boot, row];
+
+        Column::new().push(title).push(since_boot).push(row).into()
     }
 }

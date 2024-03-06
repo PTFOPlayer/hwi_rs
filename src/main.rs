@@ -3,7 +3,7 @@ mod misc;
 mod state;
 mod statistics;
 use error::AppError;
-use state::{GpuState, State};
+use state::{AxisState, GpuState, State, StaticElements};
 use statistics::*;
 mod error;
 
@@ -13,12 +13,8 @@ use std::process::Command as sysCommand;
 
 use iced::{
     executor,
-    widget::{
-        checkbox, column, container, row,
-        scrollable::{Direction, Properties},
-        text, text_input, Scrollable, Text,
-    },
-    Application, Command, Length, Pixels, Settings, Subscription, Theme,
+    widget::{button, checkbox, column, row, text_input, Column, Scrollable, Space},
+    Application, Command, Length, Settings, Subscription, Theme,
 };
 
 fn main() {
@@ -32,28 +28,13 @@ fn main() {
     let _ = App::run(settings);
 }
 
-struct StaticElements<'a> {
-    cpu_title: Text<'a>,
-    cpu_cache: Vec<(Text<'a>, Text<'a>)>,
-    cores_threads: (Text<'a>, Text<'a>),
-}
-
-impl<'a> Default for StaticElements<'a> {
-    fn default() -> Self {
-        Self {
-            cpu_title: text("Unknown"),
-            cpu_cache: vec![],
-            cores_threads: (text(""), text("")),
-        }
-    }
-}
-
 struct App {
     state: State,
     url: String,
     msr: MsrData,
     sys: SystemInfo,
     static_elements: StaticElements<'static>,
+    axis_state: AxisState,
 }
 
 #[derive(Debug, Clone)]
@@ -68,7 +49,9 @@ pub enum Message {
     CheckboxMsg {
         state: bool,
     },
+    SplitSwitch,
     Url(String),
+    Resize(u16),
 }
 
 impl Application for App {
@@ -104,6 +87,12 @@ impl Application for App {
                     Err(err) => self.state.fails.sys_fail = Some(err),
                 }
                 self.generate_static_cpu();
+
+                if self.generate_radeon().is_err() {
+                    self.state.gpu = GpuState::None
+                } else {
+                    self.state.gpu = GpuState::Radeon
+                }
             }
             Message::Tick => {
                 return Command::perform(get_data(self.url.clone()), |x| match x {
@@ -114,11 +103,11 @@ impl Application for App {
             Message::Msr(msr) => {
                 let state = &mut self.state;
                 if state.graphs_switch {
-                    state.cpu_temp_graph.modify_graph(msr.temperature);
-                    state.cpu_pwr_graph.modify_graph(msr.package_power as f32);
-                    state.cpu_usage_graph.modify_graph(msr.util as f32);
-                    // unsafe cast, i dont like it
-                    state.cpu_avg_freq_graph.modify_graph(
+                    state.cpu_temp_graph.update(msr.temperature);
+                    state.cpu_pwr_graph.update(msr.package_power as f32);
+                    state.cpu_volt_graph.update(msr.voltage as f32);
+                    state.cpu_usage_graph.update(msr.util as f32);
+                    state.cpu_avg_freq_graph.update(
                         (msr.per_core_freq.iter().sum::<u64>() / msr.per_core_freq.len() as u64)
                             as f32,
                     );
@@ -132,35 +121,57 @@ impl Application for App {
             Message::Url(url) => {
                 self.url = url;
             }
+            Message::Resize(x) => self.axis_state.set_divider(x),
+            Message::SplitSwitch => self.axis_state.switch(),
         }
         Command::none()
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
-        let button = checkbox("graphs switch", self.state.graphs_switch, |x| {
-            Message::CheckboxMsg { state: x }
-        });
-        let url_input = text_input(&self.url, &self.url).on_input(|url| Message::Url(url));
+        let graphs_switch = checkbox("graphs switch", self.state.graphs_switch)
+            .on_toggle(|x| Message::CheckboxMsg { state: x });
 
-        let misc_row = row![button, url_input].padding(20).spacing(20);
+        let split_switch = button("toggle axis").on_press(Message::SplitSwitch);
+        let url_input = text_input(&self.url, &self.url)
+            .on_input(|url| Message::Url(url))
+            .width(350.);
 
-        let content = column![self.generate_sys(), self.generate_cpu()].spacing(50);
+        let misc_row = row![graphs_switch, split_switch, url_input]
+            .padding(20)
+            .spacing(20);
+
+        let content = Column::new()
+            .push(self.generate_sys())
+            .push(self.generate_cpu())
+            .push(match self.state.gpu {
+                GpuState::None => column![].into(),
+                GpuState::Radeon => self.generate_radeon().unwrap_or(column![].into()),
+                GpuState::Nvidia => column![].into(),
+            })
+            .spacing(50);
 
         let mut graphs = column![].spacing(50);
+
         if self.state.graphs_switch {
             graphs = graphs
-                .push(text("Cpu Graphs"))
                 .push(self.state.cpu_pwr_graph.into_view())
+                .push(self.state.cpu_volt_graph.into_view())
                 .push(self.state.cpu_temp_graph.into_view())
                 .push(self.state.cpu_usage_graph.into_view())
                 .push(self.state.cpu_avg_freq_graph.into_view());
         }
 
-        let data_row = row![content, graphs].padding(20).spacing(100);
+        let scroll = iced_aw::Split::new(
+            Scrollable::new(row![content.padding(20), Space::with_width(Length::Fill)]),
+            Scrollable::new(row![graphs.padding(20), Space::with_width(Length::Fill)]),
+            self.axis_state.divider,
+            self.axis_state.split_axis,
+            Message::Resize,
+        );
 
-        let scrol = Scrollable::new(column![misc_row, data_row]);
+        let final_element = column![misc_row, scroll].width(Length::Fill);
 
-        container(scrol).into()
+        final_element.into()
     }
 
     fn theme(&self) -> iced::Theme {
@@ -188,10 +199,11 @@ impl Default for App {
     fn default() -> Self {
         Self {
             state: State::default(),
-            url: "http://localhost:8000".to_string(),
+            url: "http://localhost:7172".to_string(),
             msr: MsrData::default(),
             sys: SystemInfo::default(),
             static_elements: StaticElements::default(),
+            axis_state: AxisState::default(),
         }
     }
 }
