@@ -29,7 +29,7 @@ impl Graph {
         }
     }
 
-    pub fn modify_graph(&mut self, entry: f32) {
+    pub fn update(&mut self, entry: f32) {
         if entry > self.max_value {
             self.max_value = entry;
         }
@@ -71,7 +71,6 @@ impl Chart<Message> for Graph {
         chart.configure_series_labels().draw().unwrap();
         chart
             .draw_series(LineSeries::new(self.state.into_iter(), style::CYAN))
-            .unwrap()
-            .label("lorem ipsum");
+            .unwrap();
     }
 }

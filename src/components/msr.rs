@@ -73,7 +73,7 @@ impl App {
                 }
                 freq += data.per_core_freq[id as usize];
                 col = col.push(
-                    text(format!("core {}: {}", id, data.per_core_freq[id as usize])).size(16),
+                    text(format!("core {}: {}MHz", id, data.per_core_freq[id as usize])).size(16),
                 );
                 id += 1;
             }
@@ -87,7 +87,7 @@ impl App {
         ))
         .size(20);
 
-        let avg_freq: Text<'a> = text(format!("Avg Frequency: {: >7}", freq)).size(20);
+        let avg_freq: Text<'a> = text(format!("Avg Frequency: {: >7}MHz", freq)).size(20);
         if data.temperature > 50. {
             temp_txt = temp_txt.style(Color::new(1., 0., 0., 1.));
         };

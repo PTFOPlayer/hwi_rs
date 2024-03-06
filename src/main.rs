@@ -103,10 +103,11 @@ impl Application for App {
             Message::Msr(msr) => {
                 let state = &mut self.state;
                 if state.graphs_switch {
-                    state.cpu_temp_graph.modify_graph(msr.temperature);
-                    state.cpu_pwr_graph.modify_graph(msr.package_power as f32);
-                    state.cpu_usage_graph.modify_graph(msr.util as f32);
-                    state.cpu_avg_freq_graph.modify_graph(
+                    state.cpu_temp_graph.update(msr.temperature);
+                    state.cpu_pwr_graph.update(msr.package_power as f32);
+                    state.cpu_volt_graph.update(msr.voltage as f32);
+                    state.cpu_usage_graph.update(msr.util as f32);
+                    state.cpu_avg_freq_graph.update(
                         (msr.per_core_freq.iter().sum::<u64>() / msr.per_core_freq.len() as u64)
                             as f32,
                     );
@@ -154,6 +155,7 @@ impl Application for App {
         if self.state.graphs_switch {
             graphs = graphs
                 .push(self.state.cpu_pwr_graph.into_view())
+                .push(self.state.cpu_volt_graph.into_view())
                 .push(self.state.cpu_temp_graph.into_view())
                 .push(self.state.cpu_usage_graph.into_view())
                 .push(self.state.cpu_avg_freq_graph.into_view());
