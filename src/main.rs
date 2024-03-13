@@ -101,17 +101,7 @@ impl Application for App {
                 });
             }
             Message::Msr(msr) => {
-                let state = &mut self.state;
-                if state.graphs_switch {
-                    state.cpu_temp_graph.update(msr.temperature);
-                    state.cpu_pwr_graph.update(msr.package_power as f32);
-                    state.cpu_volt_graph.update(msr.voltage as f32);
-                    state.cpu_usage_graph.update(msr.util as f32);
-                    state.cpu_avg_freq_graph.update(
-                        (msr.per_core_freq.iter().sum::<u64>() / msr.per_core_freq.len() as u64)
-                            as f32,
-                    );
-                }
+                self.state.update_graphs(&msr);
                 self.msr = msr;
             }
             Message::Fail(fail) => self.state.fails.msr_fail = Some(fail),

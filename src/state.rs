@@ -1,6 +1,6 @@
 use iced::widget::{text, Text};
 
-use crate::{components::chart::Graph, error::AppError};
+use crate::{components::chart::Graph, error::AppError, MsrData};
 
 pub struct State {
     pub fails: Fails,
@@ -19,12 +19,24 @@ impl Default for State {
             fails: Fails::default(),
             gpu: GpuState::None,
             graphs_switch: false,
-            cpu_pwr_graph: Graph::new(50f32, "Cpu Power (W)"),
-            cpu_volt_graph: Graph::new(1f32, "Cpu Voltage (V)"),
-            cpu_temp_graph: Graph::new(100f32, "Cpu Temperature (°C)"),
-            cpu_usage_graph: Graph::new(100f32, "Cpu Usage (%)"),
-            cpu_avg_freq_graph: Graph::new(2500f32, "Cpu avarage frequency (MHz)"),
+            cpu_pwr_graph: Graph::new(50f32, "Cpu Power (W)", 50),
+            cpu_volt_graph: Graph::new(1f32, "Cpu Voltage (V)", 50),
+            cpu_temp_graph: Graph::new(100f32, "Cpu Temperature (°C)", 50),
+            cpu_usage_graph: Graph::new(100f32, "Cpu Usage (%)", 50),
+            cpu_avg_freq_graph: Graph::new(2500f32, "Cpu avarage frequency (MHz)", 50),
         }
+    }
+}
+
+impl State {
+    pub fn update_graphs(&mut self, msr: &MsrData) {
+        self.cpu_temp_graph.update(msr.temperature);
+        self.cpu_pwr_graph.update(msr.package_power as f32);
+        self.cpu_volt_graph.update(msr.voltage as f32);
+        self.cpu_usage_graph.update(msr.util as f32);
+        self.cpu_avg_freq_graph.update(
+            (msr.per_core_freq.iter().sum::<u64>() / msr.per_core_freq.len() as u64) as f32,
+        );
     }
 }
 

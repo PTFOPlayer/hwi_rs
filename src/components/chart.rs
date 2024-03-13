@@ -11,20 +11,22 @@ pub use crate::Message;
 
 #[derive(Clone)]
 pub struct Graph {
-    state: [(u32, f32); 50],
+    state: Vec<(usize, f32)>,
     max_value: f32,
+    len: usize,
     name: Rc<str>,
 }
 
 impl Graph {
-    pub fn new(max_value: f32, name: &str) -> Graph {
-        let mut state: [(u32, f32); 50] = [(0u32, 0f32); 50];
-        for i in 0..50 {
-            state[i].0 = i as u32;
+    pub fn new(max_value: f32, name: &str, len: usize) -> Graph {
+        let mut state = vec![(0usize, 0f32); len];
+        for i in 0..len {
+            state[i].0 = i;
         }
         Graph {
             state,
             max_value,
+            len,
             name: name.into(),
         }
     }
@@ -33,11 +35,11 @@ impl Graph {
         if entry > self.max_value {
             self.max_value = entry;
         }
-        for i in 0..49 {
+        for i in 0..(self.len - 1) {
             self.state[i] = self.state[i + 1];
             self.state[i].0 -= 1;
         }
-        self.state[49] = (49, entry);
+        self.state[self.len - 1] = (self.len - 1, entry);
     }
 
     pub fn into_view(&self) -> Column<'static, Message> {
@@ -59,7 +61,7 @@ impl Chart<Message> for Graph {
         let mut chart = builder
             .margin(5)
             .set_left_and_bottom_label_area_size(60)
-            .build_cartesian_2d(0u32..50u32, 0f32..self.max_value)
+            .build_cartesian_2d(0..self.len, 0f32..self.max_value)
             .unwrap();
         chart
             .configure_mesh()
@@ -70,7 +72,7 @@ impl Chart<Message> for Graph {
             .unwrap();
         chart.configure_series_labels().draw().unwrap();
         chart
-            .draw_series(LineSeries::new(self.state.into_iter(), style::CYAN))
+            .draw_series(LineSeries::new(self.state.clone().into_iter(), style::CYAN))
             .unwrap();
     }
 }
