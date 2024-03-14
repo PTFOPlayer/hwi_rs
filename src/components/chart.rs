@@ -42,6 +42,11 @@ impl Graph {
         self.state[self.len - 1] = (self.len - 1, entry);
     }
 
+    pub fn resize(&mut self, size: usize) {
+        self.len = size;
+        self.state = vec![(0usize, 0f32); size];
+    }
+
     pub fn into_view(&self) -> Column<'static, Message> {
         let chart = ChartWidget::new(self.clone())
             .height(250.into())

@@ -6,6 +6,7 @@ pub struct State {
     pub fails: Fails,
     pub gpu: GpuState,
     pub graphs_switch: bool,
+    pub graphs_sizes: usize,
     pub cpu_pwr_graph: Graph,
     pub cpu_volt_graph: Graph,
     pub cpu_temp_graph: Graph,
@@ -19,6 +20,7 @@ impl Default for State {
             fails: Fails::default(),
             gpu: GpuState::None,
             graphs_switch: false,
+            graphs_sizes: 50,
             cpu_pwr_graph: Graph::new(50f32, "Cpu Power (W)", 50),
             cpu_volt_graph: Graph::new(1f32, "Cpu Voltage (V)", 50),
             cpu_temp_graph: Graph::new(100f32, "Cpu Temperature (°C)", 50),
@@ -37,6 +39,15 @@ impl State {
         self.cpu_avg_freq_graph.update(
             (msr.per_core_freq.iter().sum::<u64>() / msr.per_core_freq.len() as u64) as f32,
         );
+    }
+
+    pub fn resize_graphs(&mut self, size: usize) {
+        self.graphs_sizes = size;
+        self.cpu_temp_graph.resize(size);
+        self.cpu_pwr_graph.resize(size);
+        self.cpu_volt_graph.resize(size);
+        self.cpu_usage_graph.resize(size);
+        self.cpu_avg_freq_graph.resize(size);
     }
 }
 
