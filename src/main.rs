@@ -3,11 +3,12 @@ mod misc;
 mod state;
 mod statistics;
 use error::AppError;
+use iced_aw::number_input;
 use state::{AxisState, GpuState, State, StaticElements};
 use statistics::*;
 mod error;
 
-use std::time::Duration;
+use std::{time::Duration, usize};
 
 use std::process::Command as sysCommand;
 
@@ -51,7 +52,8 @@ pub enum Message {
     },
     SplitSwitch,
     Url(String),
-    Resize(u16),
+    SplitResize(u16),
+    ResizeGraphs(usize),
 }
 
 impl Application for App {
@@ -101,17 +103,7 @@ impl Application for App {
                 });
             }
             Message::Msr(msr) => {
-                let state = &mut self.state;
-                if state.graphs_switch {
-                    state.cpu_temp_graph.update(msr.temperature);
-                    state.cpu_pwr_graph.update(msr.package_power as f32);
-                    state.cpu_volt_graph.update(msr.voltage as f32);
-                    state.cpu_usage_graph.update(msr.util as f32);
-                    state.cpu_avg_freq_graph.update(
-                        (msr.per_core_freq.iter().sum::<u64>() / msr.per_core_freq.len() as u64)
-                            as f32,
-                    );
-                }
+                self.state.update_graphs(&msr);
                 self.msr = msr;
             }
             Message::Fail(fail) => self.state.fails.msr_fail = Some(fail),
@@ -121,8 +113,9 @@ impl Application for App {
             Message::Url(url) => {
                 self.url = url;
             }
-            Message::Resize(x) => self.axis_state.set_divider(x),
+            Message::SplitResize(x) => self.axis_state.set_divider(x),
             Message::SplitSwitch => self.axis_state.switch(),
+            Message::ResizeGraphs(size) => self.state.resize_graphs(size),
         }
         Command::none()
     }
@@ -135,8 +128,11 @@ impl Application for App {
         let url_input = text_input(&self.url, &self.url)
             .on_input(|url| Message::Url(url))
             .width(350.);
+        let graphs_size_input = number_input(self.state.graphs_sizes, 200usize, |size| {
+            Message::ResizeGraphs(size)
+        });
 
-        let misc_row = row![graphs_switch, split_switch, url_input]
+        let misc_row = row![graphs_switch, split_switch, url_input, graphs_size_input]
             .padding(20)
             .spacing(20);
 
@@ -166,7 +162,7 @@ impl Application for App {
             Scrollable::new(row![graphs.padding(20), Space::with_width(Length::Fill)]),
             self.axis_state.divider,
             self.axis_state.split_axis,
-            Message::Resize,
+            Message::SplitResize,
         );
 
         let final_element = column![misc_row, scroll].width(Length::Fill);
