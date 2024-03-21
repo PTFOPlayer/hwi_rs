@@ -1,6 +1,9 @@
 use std::rc::Rc;
 
-use iced::widget::{text, Column};
+use iced::{
+    widget::{text, Column, Container},
+    Border, Color, Shadow,
+};
 use plotters::{
     series::LineSeries,
     style::{self, IntoTextStyle},
@@ -42,20 +45,39 @@ impl Graph {
         self.state[self.len - 1] = (self.len - 1, entry);
     }
 
-    pub fn resize(&mut self, size: usize) {
-        self.len = size;
-        self.state = vec![(0usize, 0f32); size];
+    pub fn resize(&mut self, mut len: usize) {
+        if len == 0 {
+            len += 1;
+        }
+        self.len = len;
+        self.state = vec![(0usize, 0f32); len];
+        for i in 0..len {
+            self.state[i].0 = i;
+        }
     }
 
-    pub fn into_view(&self) -> Column<'static, Message> {
+    pub fn into_view(&self) -> Container<'_, Message> {
         let chart = ChartWidget::new(self.clone())
             .height(250.into())
             .width(750.into());
 
-        Column::new()
-            .spacing(10)
-            .push(text(self.name.clone()))
-            .push(chart)
+        Container::new(
+            Column::new()
+                .spacing(10)
+                .push(text(self.name.clone()).size(31))
+                .push(chart),
+        )
+        .style(|_: &_| iced::widget::container::Appearance {
+            border: Border {
+                color: Color::from_rgba8(10, 10, 10, 1.),
+                width: 3.,
+                radius: [12., 12., 12., 12.].into(),
+            },
+            text_color: None,
+            background: None,
+            shadow: Shadow::default(),
+        })
+        .padding(14)
     }
 }
 

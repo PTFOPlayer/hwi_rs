@@ -2,9 +2,9 @@ use std::time::{Duration, SystemTime};
 
 use crate::misc::prec;
 use crate::{App, Message};
-use iced::widget::{column, row, text, Column};
+use iced::widget::{column, row, text, Column, Container};
 use iced::widget::{Row, Text};
-use iced::Color;
+use iced::{Border, Color, Shadow};
 
 impl App {
     #[inline]
@@ -54,14 +54,25 @@ impl App {
             None => {}
         };
 
-        let mut cache_section: Column<'a, Message> = column![];
+        let mut cache_column: Column<'a, Message> = column![text("Cache").size(31)];
         for c in &self.static_elements.cpu_cache {
-            cache_section =
-                cache_section.push(row![c.0.clone(), c.1.clone()].padding(5).spacing(10));
+            cache_column = cache_column.push(row![c.0.clone(), c.1.clone()].padding(5).spacing(10));
         }
+        let cache_section = Container::new(cache_column)
+            .style(|_: &_| iced::widget::container::Appearance {
+                border: Border {
+                    color: Color::from_rgba8(10, 10, 10, 1.),
+                    width: 3.,
+                    radius: [12., 12., 12., 12.].into(),
+                },
+                text_color: None,
+                background: None,
+                shadow: Shadow::default(),
+            })
+            .padding(14);
 
         let len = data.per_core_freq.len() as u64;
-        let mut freq_section: Row<'a, Message> = row![].spacing(20);
+        let mut freq_layout: Row<'a, Message> = row![].spacing(20);
         let mut id = 0u64;
         let mut freq = 0u64;
 
@@ -73,13 +84,31 @@ impl App {
                 }
                 freq += data.per_core_freq[id as usize];
                 col = col.push(
-                    text(format!("core {}: {}MHz", id, data.per_core_freq[id as usize])).size(16),
+                    text(format!(
+                        "core {}: {}MHz",
+                        id, data.per_core_freq[id as usize]
+                    ))
+                    .size(16),
                 );
                 id += 1;
             }
-            freq_section = freq_section.push(col);
+            freq_layout = freq_layout.push(col);
         }
         freq = freq / len;
+
+        let freq_section =
+            Container::new(column![text("Per Core Frequency").size(31), freq_layout])
+                .style(|_: &_| iced::widget::container::Appearance {
+                    border: Border {
+                        color: Color::from_rgba8(10, 10, 10, 1.),
+                        width: 3.,
+                        radius: [12., 12., 12., 12.].into(),
+                    },
+                    text_color: None,
+                    background: None,
+                    shadow: Shadow::default(),
+                })
+                .padding(14);
 
         let mut temp_txt = text(format!(
             "Temperature: {: >7}°C",
@@ -113,11 +142,26 @@ impl App {
         let col3 = Column::new().spacing(10).push(text("")).push(avg_freq);
         let row = row![col1, col2, col3].spacing(35);
 
-        Column::new()
-            .push(self.static_elements.cpu_title.clone())
-            .push(row)
-            .push(row![cache_section, freq_section].spacing(10))
-            .into()
+        Container::new(
+            Column::new()
+                .push(self.static_elements.cpu_title.clone())
+                .push(row)
+                .push(cache_section)
+                .push(freq_section)
+                .spacing(10),
+        )
+        .style(|_: &_| iced::widget::container::Appearance {
+            border: Border {
+                color: Color::from_rgba8(10, 10, 10, 1.),
+                width: 3.,
+                radius: [12., 12., 12., 12.].into(),
+            },
+            text_color: None,
+            background: None,
+            shadow: Shadow::default(),
+        })
+        .padding(14)
+        .into()
     }
 
     pub fn generate_sys<'a>(&self) -> iced::Element<'a, <App as iced::Application>::Message> {
@@ -151,6 +195,18 @@ impl App {
 
         let row = row![kernel, os_version].spacing(35);
 
-        Column::new().push(title).push(since_boot).push(row).into()
+        Container::new(Column::new().push(title).push(since_boot).push(row))
+            .style(|_: &_| iced::widget::container::Appearance {
+                border: Border {
+                    color: Color::from_rgba8(10, 10, 10, 1.),
+                    width: 3.,
+                    radius: [12., 12., 12., 12.].into(),
+                },
+                text_color: None,
+                background: None,
+                shadow: Shadow::default(),
+            })
+            .padding(14)
+            .into()
     }
 }
