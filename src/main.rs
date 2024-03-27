@@ -7,6 +7,7 @@ use iced_aw::number_input;
 use state::{AxisState, GpuState, State, StaticElements};
 use statistics::*;
 mod error;
+mod styles;
 
 use std::{time::Duration, usize};
 
@@ -128,7 +129,7 @@ impl Application for App {
         let url_input = text_input(&self.url, &self.url)
             .on_input(|url| Message::Url(url))
             .width(350.);
-        let graphs_size_input = number_input(self.state.graphs_sizes, 200usize, |size| {
+        let graphs_size_input = number_input(self.state.graphs_sizes, 1000usize, |size| {
             Message::ResizeGraphs(size)
         });
 

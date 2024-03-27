@@ -1,9 +1,9 @@
-use crate::App;
-
-use iced::{
-    widget::{row, text, Column, Row},
-    Color,
+use crate::{
+    styles::{self, Styled},
+    App,
 };
+
+use iced::widget::{row, text, Column, Container, Row};
 use rocm_smi_lib::{
     device::RocmSmiDevice, error::RocmErr, queries::performance::RsmiClkType, RocmSmi,
 };
@@ -21,9 +21,7 @@ impl App {
             let device = RocmSmiDevice::new(dev_id)?;
             let identifiers = device.get_identifiers()?;
 
-            let title = text(format!("{}", identifiers.name))
-                .size(35)
-                .style(Color::from_rgb8(237, 28, 36));
+            let title = styles::title::title(&identifiers.name);
             let vendor = text(format!("Vendor: {}", identifiers.vendor_name)).size(20);
 
             let vram_vendor =
@@ -32,11 +30,10 @@ impl App {
             let vendor_info = row![vendor, vram_vendor].spacing(35);
 
             let usage = text(format!("Usage: {}", device.get_busy_percent()?)).size(20);
-            let freq = text(format!(
-                "Soc Frequency: {}",
-                device.get_frequency(RsmiClkType::RsmiClkTypeSys)?.current / 1000 / 1000
-            ))
-            .size(20);
+
+            let current_clk =
+                device.get_frequency(RsmiClkType::RsmiClkTypeSys)?.current / 1000 / 1000;
+            let freq = text(format!("Soc Frequency: {}", current_clk)).size(20);
 
             let col1 = Column::new().spacing(10).push(usage);
             let col2 = Column::new().spacing(10).push(freq);
@@ -47,6 +44,8 @@ impl App {
             col = col.push(title).push(vendor_info).push(row);
         }
 
-        Ok(col.into())
+        Ok(Container::new(col)
+            .padding_style(14, styles::boxes::surround_with_box())
+            .into())
     }
 }
