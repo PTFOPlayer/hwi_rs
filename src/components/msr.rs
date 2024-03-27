@@ -1,10 +1,22 @@
 use std::time::{Duration, SystemTime};
 
+use crate::error::AppError;
 use crate::misc::prec;
+use crate::styles::Styled;
 use crate::{styles, App, Message};
 use iced::widget::{column, row, text, Column, Container};
 use iced::widget::{Row, Text};
 use iced::Color;
+
+type ElementSimple<'a> = iced::Element<'a, <App as iced::Application>::Message>;
+
+fn fail_msr<'a>(kind: &str, err: &AppError) -> ElementSimple<'a> {
+    text(format!(
+        "occured error while requesting MSR({}): {:?}",
+        kind, err
+    ))
+    .into()
+}
 
 impl App {
     #[inline]
@@ -29,27 +41,19 @@ impl App {
         );
     }
 
-    pub fn generate_cpu<'a>(&self) -> iced::Element<'a, <App as iced::Application>::Message> {
+    pub fn generate_cpu<'a>(&self) -> ElementSimple<'a> {
         let data = &self.msr;
 
-        match &self.state.fails.msr_fail {
-            Some(err) => {
-                return text(format!(
-                    "occured error while requesting MSR(cpu): {:?}",
-                    err
-                ))
-                .into()
-            }
-            None => {}
-        };
+        if let Some(err) = &self.state.fails.msr_fail {
+            return fail_msr("msr", err);
+        }
 
         let mut cache_column: Column<'a, Message> = column![text("Cache").size(31)];
         for c in &self.static_elements.cpu_cache {
             cache_column = cache_column.push(row![c.0.clone(), c.1.clone()].padding(5).spacing(10));
         }
-        let cache_section = Container::new(cache_column)
-            .style(|_: &_| styles::boxes::surround_with_box())
-            .padding(14);
+        let cache_section =
+            Container::new(cache_column).padding_style(14, styles::boxes::surround_with_box());
 
         let len = data.per_core_freq.len() as u64;
         let mut freq_layout: Row<'a, Message> = row![].spacing(20);
@@ -78,8 +82,7 @@ impl App {
 
         let freq_section =
             Container::new(column![text("Per Core Frequency").size(31), freq_layout])
-                .style(|_: &_| styles::boxes::surround_with_box())
-                .padding(14);
+                .padding_style(14, styles::boxes::surround_with_box());
 
         let mut temp_txt = text(format!(
             "Temperature: {: >7}°C",
@@ -121,27 +124,18 @@ impl App {
                 .push(freq_section)
                 .spacing(10),
         )
-        .style(|_: &_| styles::boxes::surround_with_box())
-        .padding(14)
+        .padding_style(14, styles::boxes::surround_with_box())
         .into()
     }
 
-    pub fn generate_sys<'a>(&self) -> iced::Element<'a, <App as iced::Application>::Message> {
+    pub fn generate_sys<'a>(&self) -> ElementSimple<'a> {
         let sys = &self.sys;
-        match &self.state.fails.sys_fail {
-            Some(err) => {
-                return text(format!(
-                    "occured error while requesting MSR(sys): {:?}",
-                    err
-                ))
-                .into()
-            }
-            None => {}
-        };
 
-        let title = text(sys.host_name.clone())
-            .size(35)
-            .style(Color::from_rgb8(81, 162, 218));
+        if let Some(err) = &self.state.fails.msr_fail {
+            return fail_msr("sys", err);
+        }
+
+        let title = styles::title::title(&sys.host_name);
 
         let system_time = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
@@ -158,8 +152,7 @@ impl App {
         let row = row![kernel, os_version].spacing(35);
 
         Container::new(Column::new().push(title).push(since_boot).push(row))
-            .style(|_: &_| styles::boxes::surround_with_box())
-            .padding(14)
+            .padding_style(14, styles::boxes::surround_with_box())
             .into()
     }
 }

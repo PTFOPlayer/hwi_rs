@@ -1,7 +1,7 @@
-use iced::{Border, Color, Shadow};
+use iced::{widget::container, Border, Color, Shadow};
 
-pub fn surround_with_box() -> iced::widget::container::Appearance {
-    iced::widget::container::Appearance {
+pub fn surround_with_box() -> container::Appearance {
+    container::Appearance {
         border: Border {
             color: Color::from_rgba8(10, 10, 10, 1.),
             width: 3.,
