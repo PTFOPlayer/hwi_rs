@@ -1,28 +1,17 @@
 use std::time::{Duration, SystemTime};
 
 use crate::misc::prec;
-use crate::{App, Message};
+use crate::{styles, App, Message};
 use iced::widget::{column, row, text, Column, Container};
 use iced::widget::{Row, Text};
-use iced::{Border, Color, Shadow};
+use iced::Color;
 
 impl App {
     #[inline]
     pub fn generate_static_cpu<'a>(&mut self) {
         let data = &self.msr;
-        self.static_elements.cpu_title = {
-            if data.name.contains("Intel") {
-                text(format!("{}", data.name))
-                    .size(35)
-                    .style(Color::from_rgb8(0, 193, 243))
-            } else if data.name.contains("AMD") {
-                text(format!("{}", data.name))
-                    .size(35)
-                    .style(Color::from_rgb8(237, 28, 36))
-            } else {
-                text(format!("{}", data.name)).size(35)
-            }
-        };
+
+        self.static_elements.cpu_title = styles::title::title(&data.name);
 
         let mut cache_vec = vec![];
         for c in &data.cache {
@@ -59,16 +48,7 @@ impl App {
             cache_column = cache_column.push(row![c.0.clone(), c.1.clone()].padding(5).spacing(10));
         }
         let cache_section = Container::new(cache_column)
-            .style(|_: &_| iced::widget::container::Appearance {
-                border: Border {
-                    color: Color::from_rgba8(10, 10, 10, 1.),
-                    width: 3.,
-                    radius: [12., 12., 12., 12.].into(),
-                },
-                text_color: None,
-                background: None,
-                shadow: Shadow::default(),
-            })
+            .style(|_: &_| styles::boxes::surround_with_box())
             .padding(14);
 
         let len = data.per_core_freq.len() as u64;
@@ -98,16 +78,7 @@ impl App {
 
         let freq_section =
             Container::new(column![text("Per Core Frequency").size(31), freq_layout])
-                .style(|_: &_| iced::widget::container::Appearance {
-                    border: Border {
-                        color: Color::from_rgba8(10, 10, 10, 1.),
-                        width: 3.,
-                        radius: [12., 12., 12., 12.].into(),
-                    },
-                    text_color: None,
-                    background: None,
-                    shadow: Shadow::default(),
-                })
+                .style(|_: &_| styles::boxes::surround_with_box())
                 .padding(14);
 
         let mut temp_txt = text(format!(
@@ -150,16 +121,7 @@ impl App {
                 .push(freq_section)
                 .spacing(10),
         )
-        .style(|_: &_| iced::widget::container::Appearance {
-            border: Border {
-                color: Color::from_rgba8(10, 10, 10, 1.),
-                width: 3.,
-                radius: [12., 12., 12., 12.].into(),
-            },
-            text_color: None,
-            background: None,
-            shadow: Shadow::default(),
-        })
+        .style(|_: &_| styles::boxes::surround_with_box())
         .padding(14)
         .into()
     }
@@ -196,16 +158,7 @@ impl App {
         let row = row![kernel, os_version].spacing(35);
 
         Container::new(Column::new().push(title).push(since_boot).push(row))
-            .style(|_: &_| iced::widget::container::Appearance {
-                border: Border {
-                    color: Color::from_rgba8(10, 10, 10, 1.),
-                    width: 3.,
-                    radius: [12., 12., 12., 12.].into(),
-                },
-                text_color: None,
-                background: None,
-                shadow: Shadow::default(),
-            })
+            .style(|_: &_| styles::boxes::surround_with_box())
             .padding(14)
             .into()
     }

@@ -1,9 +1,6 @@
 use crate::App;
 
-use iced::{
-    widget::{row, text, Column, Row},
-    Color,
-};
+use iced::widget::{row, text, Column, Container, Row};
 use rocm_smi_lib::{
     device::RocmSmiDevice, error::RocmErr, queries::performance::RsmiClkType, RocmSmi,
 };
@@ -21,9 +18,7 @@ impl App {
             let device = RocmSmiDevice::new(dev_id)?;
             let identifiers = device.get_identifiers()?;
 
-            let title = text(format!("{}", identifiers.name))
-                .size(35)
-                .style(Color::from_rgb8(237, 28, 36));
+            let title = crate::styles::title::title(&identifiers.name);
             let vendor = text(format!("Vendor: {}", identifiers.vendor_name)).size(20);
 
             let vram_vendor =
@@ -47,6 +42,9 @@ impl App {
             col = col.push(title).push(vendor_info).push(row);
         }
 
-        Ok(col.into())
+        Ok(Container::new(col)
+            .style(|_: &_| crate::styles::boxes::surround_with_box())
+            .padding(14)
+            .into())
     }
 }

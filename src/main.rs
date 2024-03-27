@@ -7,6 +7,7 @@ use iced_aw::number_input;
 use state::{AxisState, GpuState, State, StaticElements};
 use statistics::*;
 mod error;
+mod styles;
 
 use std::{time::Duration, usize};
 
