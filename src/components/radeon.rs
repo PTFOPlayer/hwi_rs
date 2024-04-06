@@ -12,20 +12,20 @@ impl App {
     pub fn generate_radeon(
         &self,
     ) -> Result<iced::Element<'_, <App as iced::Application>::Message>, RocmErr> {
-        let rocm = RocmSmi::init()?;
+        let mut rocm = RocmSmi::init()?;
         let dev_c = rocm.get_device_count();
 
         let mut col = Column::new();
 
         for dev_id in 0..dev_c {
-            let device = RocmSmiDevice::new(dev_id)?;
+            let mut device = RocmSmiDevice::new(dev_id)?;
             let identifiers = device.get_identifiers()?;
 
-            let title = styles::title::title(&identifiers.name);
-            let vendor = text(format!("Vendor: {}", identifiers.vendor_name)).size(20);
+            let title = styles::title::title(&identifiers.name?);
+            let vendor = text(format!("Vendor: {}", identifiers.vendor_name?)).size(20);
 
             let vram_vendor =
-                text(format!("Vram vendor: {}", identifiers.vram_vendor_name)).size(20);
+                text(format!("Vram vendor: {}", identifiers.vram_vendor_name?)).size(20);
 
             let vendor_info = row![vendor, vram_vendor].spacing(35);
 

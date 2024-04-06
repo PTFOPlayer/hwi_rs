@@ -3,21 +3,19 @@ mod misc;
 mod state;
 mod statistics;
 use error::AppError;
-use iced_aw::number_input;
-use state::{AxisState, GpuState, State, StaticElements};
+use iced_aw::Tabs;
+use state::{AxisState, GpuState, State};
 use statistics::*;
+use tabs::tab_trait::Tab;
 mod error;
 mod styles;
+mod tabs;
 
-use std::{time::Duration, usize};
+use std::time::Duration;
 
 use std::process::Command as sysCommand;
 
-use iced::{
-    executor,
-    widget::{button, checkbox, column, row, text_input, Column, Scrollable, Space},
-    Application, Command, Length, Settings, Subscription, Theme,
-};
+use iced::{executor, Application, Command, Settings, Subscription, Theme};
 
 fn main() {
     let mut msr = sysCommand::new("systemctl");
@@ -32,10 +30,9 @@ fn main() {
 
 struct App {
     state: State,
-    url: String,
     msr: MsrData,
     sys: SystemInfo,
-    static_elements: StaticElements<'static>,
+    page: Page,
     axis_state: AxisState,
 }
 
@@ -55,6 +52,16 @@ pub enum Message {
     Url(String),
     SplitResize(u16),
     ResizeGraphs(usize),
+    SetPage(Page),
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Page {
+    #[default]
+    Sys,
+    CPU,
+    GPU,
+    Settings,
 }
 
 impl Application for App {
@@ -65,7 +72,7 @@ impl Application for App {
 
     fn new(_flags: ()) -> (App, iced::Command<Message>) {
         let app = App::default();
-        let url = app.url.clone();
+        let url = app.state.settings.url.clone();
         (
             app,
             Command::perform(prepare(url), |x| {
@@ -89,7 +96,6 @@ impl Application for App {
                     Ok(res) => self.sys = res,
                     Err(err) => self.state.fails.sys_fail = Some(err),
                 }
-                self.generate_static_cpu();
 
                 if self.generate_radeon().is_err() {
                     self.state.gpu = GpuState::None
@@ -98,77 +104,49 @@ impl Application for App {
                 }
             }
             Message::Tick => {
-                return Command::perform(get_data(self.url.clone()), |x| match x {
+                return Command::perform(get_data(self.state.settings.url.clone()), |x| match x {
                     Ok(res) => Message::Msr(res),
                     Err(err) => Message::Fail(err),
                 });
             }
             Message::Msr(msr) => {
-                self.state.update_graphs(&msr);
-                self.msr = msr;
+                self.state.cpu.update(msr);
             }
             Message::Fail(fail) => self.state.fails.msr_fail = Some(fail),
             Message::CheckboxMsg { state } => {
-                self.state.graphs_switch = state;
+                self.state.settings.graphs_switch = state;
             }
             Message::Url(url) => {
-                self.url = url;
+                self.state.settings.url = url;
             }
             Message::SplitResize(x) => self.axis_state.set_divider(x),
             Message::SplitSwitch => self.axis_state.switch(),
-            Message::ResizeGraphs(size) => self.state.resize_graphs(size),
+            Message::ResizeGraphs(x) => {
+                self.state.cpu.resize_graphs(x);
+                self.state.settings.graphs_sizes = x
+            }
+            Message::SetPage(page) => self.page = page,
         }
         Command::none()
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
-        let graphs_switch = checkbox("graphs switch", self.state.graphs_switch)
-            .on_toggle(|x| Message::CheckboxMsg { state: x });
+        // init radeon
+        // .push(match self.state.gpu {
+        //     GpuState::None => column![].into(),
+        //     GpuState::Radeon => self.generate_radeon().unwrap_or(column![].into()),
+        //     GpuState::Nvidia => column![].into(),
+        // })
+        let tab = Tabs::new(Message::SetPage)
+            .push(Page::CPU, self.state.cpu.tab_label(), self.state.cpu.view())
+            .push(
+                Page::Settings,
+                self.state.settings.tab_label(),
+                self.state.settings.view(),
+            )
+            .set_active_tab(&self.page);
 
-        let split_switch = button("toggle axis").on_press(Message::SplitSwitch);
-        let url_input = text_input(&self.url, &self.url)
-            .on_input(|url| Message::Url(url))
-            .width(350.);
-        let graphs_size_input = number_input(self.state.graphs_sizes, 1000usize, |size| {
-            Message::ResizeGraphs(size)
-        });
-
-        let misc_row = row![graphs_switch, split_switch, url_input, graphs_size_input]
-            .padding(20)
-            .spacing(20);
-
-        let content = Column::new()
-            .push(self.generate_sys())
-            .push(self.generate_cpu())
-            .push(match self.state.gpu {
-                GpuState::None => column![].into(),
-                GpuState::Radeon => self.generate_radeon().unwrap_or(column![].into()),
-                GpuState::Nvidia => column![].into(),
-            })
-            .spacing(50);
-
-        let mut graphs = column![].spacing(50);
-
-        if self.state.graphs_switch {
-            graphs = graphs
-                .push(self.state.cpu_pwr_graph.into_view())
-                .push(self.state.cpu_volt_graph.into_view())
-                .push(self.state.cpu_temp_graph.into_view())
-                .push(self.state.cpu_usage_graph.into_view())
-                .push(self.state.cpu_avg_freq_graph.into_view());
-        }
-
-        let scroll = iced_aw::Split::new(
-            Scrollable::new(row![content.padding(20), Space::with_width(Length::Fill)]),
-            Scrollable::new(row![graphs.padding(20), Space::with_width(Length::Fill)]),
-            self.axis_state.divider,
-            self.axis_state.split_axis,
-            Message::SplitResize,
-        );
-
-        let final_element = column![misc_row, scroll].width(Length::Fill);
-
-        final_element.into()
+        tab.into()
     }
 
     fn theme(&self) -> iced::Theme {
@@ -196,11 +174,10 @@ impl Default for App {
     fn default() -> Self {
         Self {
             state: State::default(),
-            url: "http://localhost:7172".to_string(),
             msr: MsrData::default(),
             sys: SystemInfo::default(),
-            static_elements: StaticElements::default(),
             axis_state: AxisState::default(),
+            page: Page::default(),
         }
     }
 }
