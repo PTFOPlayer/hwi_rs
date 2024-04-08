@@ -30,8 +30,6 @@ fn main() {
 
 struct App {
     state: State,
-    msr: MsrData,
-    sys: SystemInfo,
     page: Page,
     axis_state: AxisState,
 }
@@ -39,12 +37,12 @@ struct App {
 #[derive(Debug, Clone)]
 pub enum Message {
     Tick,
+    Null,
     Msr(MsrData),
     Prep {
         msr: Result<MsrData, AppError>,
         sys: Result<SystemInfo, AppError>,
     },
-    Fail(AppError),
     CheckboxMsg {
         state: bool,
     },
@@ -89,12 +87,12 @@ impl Application for App {
         match message {
             Message::Prep { msr, sys } => {
                 match msr {
-                    Ok(res) => self.msr = res,
-                    Err(err) => self.state.fails.msr_fail = Some(err),
+                    Ok(res) => self.state.cpu.msr = res,
+                    Err(_err) => {}
                 }
                 match sys {
-                    Ok(res) => self.sys = res,
-                    Err(err) => self.state.fails.sys_fail = Some(err),
+                    Ok(res) => self.state.sys.sys = res,
+                    Err(_err) => {}
                 }
 
                 if self.generate_radeon().is_err() {
@@ -104,15 +102,16 @@ impl Application for App {
                 }
             }
             Message::Tick => {
-                return Command::perform(get_data(self.state.settings.url.clone()), |x| match x {
+                let url = self.state.settings.url.clone();
+
+                return Command::perform(get_data(url), |x| match x {
                     Ok(res) => Message::Msr(res),
-                    Err(err) => Message::Fail(err),
+                    _ => Message::Null,
                 });
             }
             Message::Msr(msr) => {
                 self.state.cpu.update(msr);
             }
-            Message::Fail(fail) => self.state.fails.msr_fail = Some(fail),
             Message::CheckboxMsg { state } => {
                 self.state.settings.graphs_switch = state;
             }
@@ -126,6 +125,7 @@ impl Application for App {
                 self.state.settings.graphs_sizes = x
             }
             Message::SetPage(page) => self.page = page,
+            Message::Null => {}
         }
         Command::none()
     }
@@ -139,6 +139,7 @@ impl Application for App {
         // })
         let tab = Tabs::new(Message::SetPage)
             .push(Page::CPU, self.state.cpu.tab_label(), self.state.cpu.view())
+            .push(Page::Sys, self.state.sys.tab_label(), self.state.sys.view())
             .push(
                 Page::Settings,
                 self.state.settings.tab_label(),
@@ -174,8 +175,6 @@ impl Default for App {
     fn default() -> Self {
         Self {
             state: State::default(),
-            msr: MsrData::default(),
-            sys: SystemInfo::default(),
             axis_state: AxisState::default(),
             page: Page::default(),
         }

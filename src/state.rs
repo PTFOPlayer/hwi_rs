@@ -1,29 +1,24 @@
 
-use crate::{error::AppError, tabs::{cpu::Cpu, settings::Settings}};
+use crate::tabs::{cpu::Cpu, settings::Settings, sys::Sys};
 
 pub struct State {
-    pub fails: Fails,
     pub gpu: GpuState,
     pub cpu: Cpu,
-    pub settings: Settings
+    pub settings: Settings,
+    pub sys: Sys
 }
 
 impl Default for State {
     fn default() -> Self {
         Self {
-            fails: Fails::default(),
             gpu: GpuState::None,
             cpu: Cpu::new(),
-            settings: Settings::new()
+            settings: Settings::new(),
+            sys: Sys::new()
         }
     }
 }
 
-#[derive(Default)]
-pub struct Fails {
-    pub msr_fail: Option<AppError>,
-    pub sys_fail: Option<AppError>,
-}
 
 pub enum GpuState {
     None,

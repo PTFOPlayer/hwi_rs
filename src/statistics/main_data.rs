@@ -63,11 +63,23 @@ pub async fn get_system_data(url: String) -> Result<SystemInfo, AppError> {
     Ok(msr)
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug, Default)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct SystemInfo {
     pub host_name: String,
     pub boot_time: u64,
     pub distro_id: String,
     pub kernel_version: String,
     pub os_version: String,
+}
+
+impl Default for SystemInfo {
+    fn default() -> Self {
+        Self {
+            host_name: "DefaultHostName".to_owned(),
+            boot_time: Default::default(),
+            distro_id: Default::default(),
+            kernel_version: Default::default(),
+            os_version: Default::default(),
+        }
+    }
 }

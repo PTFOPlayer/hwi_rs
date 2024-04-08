@@ -1,4 +1,3 @@
-
 use crate::misc::prec;
 use crate::styles::Styled;
 use crate::{styles, App, Message};
@@ -100,32 +99,4 @@ impl crate::tabs::cpu::Cpu {
         .padding_style(14, styles::boxes::surround_with_box())
         .into()
     }
-
-    // pub fn generate_sys<'a>(&self) -> ElementSimple<'a> {
-    //     let sys = &self.sys;
-
-    //     if let Some(err) = &self.state.fails.msr_fail {
-    //         return fail_msr("sys", err);
-    //     }
-
-    //     let title = styles::title::title(&sys.host_name);
-
-    //     let system_time = SystemTime::now()
-    //         .duration_since(SystemTime::UNIX_EPOCH)
-    //         .unwrap();
-    //     let start_time = Duration::from_secs(sys.boot_time);
-    //     let t = (system_time - start_time).as_secs();
-    //     let h = t / 3600;
-    //     let m = (t - (h * 3600)) / 60;
-    //     let since_boot = text(format!("Since boot: {}h, {}m", h, m)).size(20);
-
-    //     let kernel = text(format!("Kernel: {}", sys.kernel_version.clone())).size(20);
-    //     let os_version = text(sys.os_version.clone()).size(20);
-
-    //     let row = row![kernel, os_version].spacing(35);
-
-    //     Container::new(Column::new().push(title).push(since_boot).push(row))
-    //         .padding_style(14, styles::boxes::surround_with_box())
-    //         .into()
-    // }
 }
