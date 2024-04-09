@@ -3,7 +3,7 @@ mod misc;
 mod state;
 mod statistics;
 use error::AppError;
-use iced_aw::Tabs;
+use iced_aw::{TabBarStyles, TabLabel, Tabs};
 use state::{AxisState, GpuState, State};
 use statistics::*;
 use tabs::tab_trait::Tab;
@@ -138,6 +138,7 @@ impl Application for App {
         //     GpuState::Nvidia => column![].into(),
         // })
         let tab = Tabs::new(Message::SetPage)
+            .tab_bar_style(TabBarStyles::Dark)
             .push(Page::CPU, self.state.cpu.tab_label(), self.state.cpu.view())
             .push(Page::Sys, self.state.sys.tab_label(), self.state.sys.view())
             .push(
@@ -183,4 +184,33 @@ impl Default for App {
 
 async fn prepare(url: String) -> (Result<MsrData, AppError>, Result<SystemInfo, AppError>) {
     (get_data(url.clone()).await, get_system_data(url).await)
+}
+
+pub trait TryPush {
+    type TabId;
+    type Message;
+
+    fn try_push(
+        self,
+        id: Self::TabId,
+        tab_label: TabLabel,
+        element: Option<iced::Element<'static, Self::Message>>,
+    ) -> Self;
+}
+
+impl TryPush for Tabs<'_, Message, Page> {
+    type TabId = Page;
+    type Message = Message;
+
+    fn try_push(
+        self,
+        id: Self::TabId,
+        tab_label: TabLabel,
+        element: Option<iced::Element<'static, Self::Message>>,
+    ) -> Self {
+        match element {
+            Some(e) => self.push(id, tab_label, e),
+            None => self,
+        }
+    }
 }
